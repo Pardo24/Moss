@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guia d'usuari — Caliu</title>
+  <meta name="description" content="Guia completa per configurar i fer servir Caliu: primer inici, dashboard, serveis, accés extern amb Tailscale." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --accent:   #f97316;
+      --accent-g: linear-gradient(135deg, #f97316, #fb923c);
+      --text:     #0f172a;
+      --text-2:   #64748b;
+      --text-3:   #94a3b8;
+      --surface:  #ffffff;
+      --border:   rgba(15,23,42,0.08);
+      --shadow-sm:0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md:0 4px 20px rgba(0,0,0,0.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #fafbff;
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      background: rgba(15,23,42,0.07);
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-family: 'SF Mono', 'Consolas', monospace;
+      font-size: 0.85em;
+    }
+
+    /* ── Header ── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(250,251,255,0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      max-width: 1100px; margin: 0 auto; padding: 0 28px;
+      height: 60px; display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    }
+    .logo { display: flex; align-items: center; gap: 9px; font-weight: 900; font-size: 1.15rem; color: var(--text); text-decoration: none; }
+    .logo-mark {
+      width: 32px; height: 32px; border-radius: 9px;
+      background: var(--accent-g);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      box-shadow: 0 3px 10px rgba(249,115,22,0.32);
+    }
+    .back-link { font-size: 0.85rem; font-weight: 500; color: var(--text-2); }
+    .back-link:hover { color: var(--text); text-decoration: none; }
+
+    /* ── Layout ── */
+    .page { display: flex; max-width: 1100px; margin: 0 auto; padding: 0 28px; gap: 56px; align-items: flex-start; }
+    main { flex: 1; min-width: 0; padding: 56px 0 96px; }
+    aside {
+      width: 230px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 76px;
+      padding-top: 56px;
+      padding-bottom: 32px;
+    }
+
+    @media(max-width: 860px) {
+      aside { display: none; }
+      .page { padding: 0 20px; }
+    }
+
+    /* ── Sidebar nav ── */
+    .sidebar-nav { display: flex; flex-direction: column; gap: 2px; }
+    .sidebar-nav-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 8px; margin-top: 20px; }
+    .sidebar-nav-title:first-child { margin-top: 0; }
+    .sidebar-nav a {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-2);
+      padding: 5px 10px;
+      border-radius: 7px;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .sidebar-nav a:hover { color: var(--text); background: rgba(0,0,0,0.04); }
+    .sidebar-nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(249,115,22,0.06); }
+
+    /* ── Typography ── */
+    h1 { font-size: 2.4rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 16px; }
+    h2 {
+      font-size: 1.55rem; font-weight: 800; letter-spacing: -0.02em;
+      margin-top: 56px; margin-bottom: 14px;
+      padding-top: 56px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    h2:first-of-type { margin-top: 0; border-top: none; padding-top: 0; }
+    h3 { font-size: 1.05rem; font-weight: 700; margin-top: 28px; margin-bottom: 8px; }
+    p { font-size: 0.95rem; color: var(--text-2); margin-bottom: 14px; line-height: 1.75; }
+    ul, ol { padding-left: 20px; color: var(--text-2); font-size: 0.95rem; line-height: 1.75; }
+    li { margin-bottom: 6px; }
+    li strong { color: var(--text); }
+
+    /* ── Hero lead ── */
+    .lead { font-size: 1.1rem; color: var(--text-2); max-width: 600px; margin-bottom: 40px; line-height: 1.75; }
+
+    /* ── Cards & callouts ── */
+    .callout {
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+    .callout-info    { background: rgba(59,130,246,0.07);  border: 1px solid rgba(59,130,246,0.18);  color: #1e40af; }
+    .callout-warning { background: rgba(245,158,11,0.08);  border: 1px solid rgba(245,158,11,0.22);  color: #92400e; }
+    .callout-danger  { background: rgba(239,68,68,0.07);   border: 1px solid rgba(239,68,68,0.20);   color: #991b1b; }
+    .callout-success { background: rgba(34,197,94,0.07);   border: 1px solid rgba(34,197,94,0.20);   color: #14532d; }
+
+    /* ── Step list ── */
+    .step-list { display: flex; flex-direction: column; gap: 0; margin: 24px 0; }
+    .step-item { display: flex; gap: 18px; padding-bottom: 24px; position: relative; }
+    .step-item:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 17px; top: 38px;
+      width: 2px; height: calc(100% - 12px);
+      background: linear-gradient(to bottom, var(--accent), rgba(249,115,22,0.08));
+    }
+    .step-n {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      background: var(--accent-g); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.85rem;
+      box-shadow: 0 3px 10px rgba(249,115,22,0.3);
+    }
+    .step-content { padding-top: 6px; flex: 1; }
+    .step-content h4 { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .step-content p  { font-size: 0.88rem; color: var(--text-2); margin: 0; }
+
+    /* ── Service table ── */
+    .service-grid { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
+    .service-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .service-icon { font-size: 1.4rem; width: 32px; text-align: center; flex-shrink: 0; }
+    .service-name { font-weight: 700; font-size: 0.9rem; min-width: 110px; }
+    .service-port { font-family: monospace; font-size: 0.82rem; color: var(--accent); font-weight: 700; min-width: 80px; }
+    .service-desc { font-size: 0.82rem; color: var(--text-2); flex: 1; }
+    .service-tag {
+      font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 99px;
+      background: rgba(249,115,22,0.1); color: var(--accent);
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .service-tag.green { background: rgba(34,197,94,0.1); color: #16a34a; }
+    .service-tag.red   { background: rgba(239,68,68,0.1); color: #dc2626; }
+
+    /* ── Menu item cards ── */
+    .menu-grid { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+    .menu-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      box-shadow: var(--shadow-sm);
+    }
+    .menu-icon { font-size: 1.6rem; width: 36px; text-align: center; flex-shrink: 0; }
+    .menu-label { font-weight: 700; font-size: 0.92rem; margin-bottom: 4px; }
+    .menu-desc  { font-size: 0.85rem; color: var(--text-2); line-height: 1.6; }
+
+    /* ── Access comparison ── */
+    .access-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 0.88rem;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .access-table th {
+      background: rgba(15,23,42,0.05);
+      padding: 12px 16px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-2);
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .access-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-2);
+      background: var(--surface);
+    }
+    .access-table tr:last-child td { border-bottom: none; }
+    .access-table td:first-child { font-weight: 600; color: var(--text); }
+    .yes { color: #16a34a; font-weight: 700; }
+    .no  { color: #dc2626; font-weight: 700; }
+
+    /* ── Tailscale IP example ── */
+    .ip-example {
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin: 20px 0;
+      font-family: 'SF Mono', 'Consolas', monospace;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      line-height: 2;
+    }
+    .ip-highlight { color: #fb923c; font-weight: 700; }
+    .ip-comment   { color: #475569; }
+    .ip-url       { color: #60a5fa; }
+
+    /* ── Btn ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 24px; border-radius: 10px;
+      font-family: inherit; font-weight: 700; font-size: 0.9rem;
+      cursor: pointer; border: none; transition: all 0.15s; text-decoration: none;
+    }
+    .btn-primary { background: var(--accent-g); color: #fff; box-shadow: 0 4px 14px rgba(249,115,22,0.35); }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); text-decoration: none; }
+    .btn-outline { background: var(--surface); color: var(--text); border: 1.5px solid var(--border); box-shadow: var(--shadow-sm); }
+    .btn-outline:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); text-decoration: none; }
+
+    /* ── Badge ── */
+    .badge { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:0.72rem;font-weight:700; }
+    .badge-orange { background:rgba(249,115,22,0.1);color:var(--accent);border:1px solid rgba(249,115,22,0.2); }
+    .badge-green  { background:rgba(34,197,94,0.1);color:#16a34a;border:1px solid rgba(34,197,94,0.2); }
+
+    /* ── Divider ── */
+    .divider { height: 1px; background: var(--border); margin: 0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-mark">🔥</div>
+      Caliu
+    </a>
+    <a href="index.html" class="back-link">← Tornar a la pàgina principal</a>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- ── Sidebar ── -->
+  <aside>
+    <div class="sidebar-nav">
+      <div class="sidebar-nav-title">Inici</div>
+      <a href="#primer-cop">Primer cop</a>
+      <a href="#wizard">L'assistent</a>
+
+      <div class="sidebar-nav-title">Dashboard</div>
+      <a href="#menu">El menú lateral</a>
+      <a href="#inici">Pàgina Inici</a>
+      <a href="#vpn-page">Pàgina VPN</a>
+      <a href="#xarxa">Pàgina Xarxa</a>
+      <a href="#config">Pàgina Config</a>
+
+      <div class="sidebar-nav-title">Serveis</div>
+      <a href="#serveis">Tots els serveis</a>
+      <a href="#prowlarr">Configurar Prowlarr</a>
+
+      <div class="sidebar-nav-title">Accés extern</div>
+      <a href="#acces">Local vs. extern</a>
+      <a href="#tailscale">Configurar Tailscale</a>
+    </div>
+  </aside>
+
+  <!-- ── Main content ── -->
+  <main>
+    <!-- Intro -->
+    <div class="badge badge-orange" style="margin-bottom:16px;">Documentació</div>
+    <h1>Guia d'usuari de Caliu</h1>
+    <p class="lead">
+      Aquesta guia explica com fer servir Caliu pas a pas: des del primer inici fins a accedir als teus serveis des de qualsevol lloc del món.
+    </p>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:48px;">
+      <a href="https://github.com/danipardog/caliu/releases/latest" class="btn btn-primary">⬇ Descarregar Caliu</a>
+      <a href="index.html" class="btn btn-outline">← Pàgina principal</a>
+    </div>
+
+    <!-- ── PRIMER COP ──────────────────────────────────────────────────── -->
+    <h2 id="primer-cop">🚀 Primer cop</h2>
+    <p>
+      Quan obres Caliu per primera vegada (o si mai has instal·lat el stack), l'aplicació mostra l'<strong>assistent d'instal·lació</strong> — un wizard pas a pas que configura tot automàticament.
+      Si ja tens el stack instal·lat, Caliu detecta la configuració existent i obre el dashboard directament.
+    </p>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">ℹ️</div>
+      <div><strong>Requisit previ:</strong> Cal tenir <a href="https://www.docker.com/products/docker-desktop/" target="_blank">Docker Desktop</a> instal·lat i obert. És gratuït. Caliu comprova automàticament si Docker funciona i et redirigeix si cal instal·lar-lo.</div>
+    </div>
+
+    <!-- ── WIZARD ─────────────────────────────────────────────────────── -->
+    <h2 id="wizard">🧙 L'assistent d'instal·lació</h2>
+    <p>L'assistent guia l'usuari en 5 passos. Una barra de progrés a la part superior indica en quin punt ets.</p>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-n">1</div>
+        <div class="step-content">
+          <h4>Benvinguda</h4>
+          <p>Pantalla introductòria amb el resum de què fa Caliu. Prem <strong>Començar</strong> per continuar.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-n">2</div>
+        <div class="step-content">
+          <h4>Comprovació de Docker</h4>
+          <p>Caliu comprova si Docker Desktop és actiu. Si no el tens, veuràs un botó per descarregar-lo. Un cop instal·lat Docker, prem <strong>Ja l'he instal·lat, torna a comprovar</strong>.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-n">3</div>
+        <div class="step-content">
+          <h4>Carpeta de dades</h4>
+          <p>Selecciona on es guardaran els fitxers de configuració i els continguts que descarreguis. Recomana un disc extern de mínim 1 TB. <strong>Caliu no esborra cap fitxer existent.</strong></p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-n">4</div>
+        <div class="step-content">
+          <h4>Contrasenya d'administrador</h4>
+          <p>Crea la contrasenya que faràs servir a Jellyfin i altres serveis. L'usuari és sempre <code>admin</code>. Mínim 6 caràcters.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-n">5</div>
+        <div class="step-content">
+          <h4>VPN (opcional)</h4>
+          <p>Pots activar una VPN WireGuard (ProtonVPN o Mullvad) per protegir les teves descàrregues. Si no en tens una, selecciona <strong>Sense VPN</strong> i continua — pots afegir-la després des del dashboard.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-n">✓</div>
+        <div class="step-content">
+          <h4>Instal·lació automàtica</h4>
+          <p>Caliu descarrega i configura tots els serveis (pot trigar 5-10 minuts la primera vegada). Un cop acabat, el dashboard s'obre automàticament.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DASHBOARD — MENÚ ───────────────────────────────────────────── -->
+    <h2 id="menu">🗂️ El menú lateral del dashboard</h2>
+    <p>Un cop instal·lat el stack, Caliu mostra sempre el <strong>dashboard</strong> amb una barra lateral de navegació a l'esquerra amb quatre seccions:</p>
+
+    <div class="menu-grid">
+      <div class="menu-item">
+        <div class="menu-icon">🏠</div>
+        <div>
+          <div class="menu-label">Inici</div>
+          <div class="menu-desc">Estat del stack (en marxa / aturat), botons per arrencar i parar tots els serveis, i accés ràpid a cada servei amb un clic.</div>
+        </div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-icon">🔒</div>
+        <div>
+          <div class="menu-label">VPN</div>
+          <div class="menu-desc">Veure si la VPN és activa. Activar ProtonVPN o Mullvad introduint les claus WireGuard. Desactivar-la si és necessari. Els canvis s'apliquen reiniciant el stack automàticament.</div>
+        </div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-icon">🌐</div>
+        <div>
+          <div class="menu-label">Xarxa</div>
+          <div class="menu-desc">La teva IP local a la xarxa Wi-Fi, les URLs de cada servei per xarxa local, i informació per accedir des de fora de casa amb Tailscale.</div>
+        </div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-icon">⚙️</div>
+        <div>
+          <div class="menu-label">Configuració</div>
+          <div class="menu-desc">Canviar l'idioma de l'aplicació (català, castellà, anglès). Veure la versió de Caliu. Reinstal·lar el stack des de zero (no esborra el contingut multimèdia).</div>
+        </div>
+      </div>
+    </div>
+
+    <p style="margin-top:8px;"><strong>Idioma:</strong> A la part inferior de la barra lateral hi ha els botons <code>CA</code> / <code>ES</code> / <code>EN</code> per canviar l'idioma en qualsevol moment.</p>
+
+    <!-- ── INICI ───────────────────────────────────────────────────────── -->
+    <h2 id="inici">🏠 Pàgina Inici — Arrencar els serveis</h2>
+    <p>Aquesta és la pantalla principal del dashboard. Aquí pots:</p>
+    <ul>
+      <li><strong>Veure l'estat</strong> — un indicador de color mostra si el stack és En marxa (verd), Aturat (vermell) o Comprovant (groc).</li>
+      <li><strong>Arrencar el stack</strong> — premeu el botó <strong>Arrencar</strong>. Els serveis Docker s'inicien en segon pla. Pot trigar 20-60 segons la primera vegada que s'arrenca.</li>
+      <li><strong>Parar el stack</strong> — el botó <strong>Parar</strong> atura tots els contenidors Docker. Útil per estalviar recursos quan no es fa servir.</li>
+      <li><strong>Accedir a un servei</strong> — els sis botons de la graella obren directament el servei al navegador (URLs de <code>localhost</code>). Estan desactivats si el stack és aturat.</li>
+    </ul>
+
+    <div class="callout callout-warning">
+      <div class="callout-icon">⚠️</div>
+      <div><strong>Els serveis s'accedeixen via <code>localhost</code> des del propi ordinador.</strong> Per accedir des d'altres dispositius (mòbil, televisió, portàtil), cal fer servir la IP de la xarxa local o la IP de Tailscale. Consulta la secció <a href="#xarxa">Xarxa</a>.</div>
+    </div>
+
+    <!-- ── VPN PAGE ────────────────────────────────────────────────────── -->
+    <h2 id="vpn-page">🔒 Pàgina VPN</h2>
+    <p>Des d'aquí pots gestionar la VPN en qualsevol moment, sense haver de reinstal·lar.</p>
+
+    <h3>Activar una VPN</h3>
+    <p>Necessites una compte de <a href="https://go.getproton.me/aff_c?offer_id=26&aff_id=7925" target="_blank">ProtonVPN</a> o <a href="https://mullvad.net" target="_blank">Mullvad</a> amb suport WireGuard. Passos:</p>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-n">1</div>
+        <div class="step-content">
+          <h4>Genera una clau WireGuard</h4>
+          <p>A ProtonVPN: <em>Compte → Descàrregues → WireGuard</em>. A Mullvad: <em>mullvad.net → Dispositius WireGuard → Genera clau</em>.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-n">2</div>
+        <div class="step-content">
+          <h4>Copia la clau privada i l'adreça IP</h4>
+          <p>El portal et donarà una <strong>clau privada</strong> (string llarg) i una <strong>adreça IP assignada</strong> (format <code>10.x.x.x/32</code>).</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-n">3</div>
+        <div class="step-content">
+          <h4>Enganxa-les a Caliu i prem Activar VPN</h4>
+          <p>Caliu actualitza el fitxer de configuració, canvia al compose file amb VPN i reinicia el stack. Triga uns 30 segons.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>Desactivar la VPN</h3>
+    <p>Prem el botó <strong>Desactivar VPN</strong>. Caliu elimina les claus i passa al compose sense VPN automàticament.</p>
+
+    <!-- ── XARXA ───────────────────────────────────────────────────────── -->
+    <h2 id="xarxa">🌐 Pàgina Xarxa</h2>
+    <p>Aquí trobaràs totes les URLs per accedir als serveis des de qualsevol dispositiu.</p>
+
+    <h3>IP de xarxa local</h3>
+    <p>
+      La teva IP local (ex: <code>192.168.1.42</code>) és la que fan servir els dispositius connectats al <strong>mateix Wi-Fi o cable de casa</strong>.
+      Per accedir a Jellyfin des del mòbil (al mateix Wi-Fi), la URL seria <code>http://192.168.1.42:8096</code>.
+    </p>
+
+    <div class="callout callout-danger">
+      <div class="callout-icon">🚫</div>
+      <div>
+        <strong>La IP local NO funciona fora de casa.</strong> Si intentes accedir a <code>http://192.168.1.42:8096</code> des del mòbil amb dades mòbils, o des d'una altra xarxa, <strong>no funcionarà</strong>.
+        Per accedir des de qualsevol lloc cal configurar Tailscale. <a href="#tailscale">Com configurar Tailscale →</a>
+      </div>
+    </div>
+
+    <h3>URLs de cada servei (xarxa local)</h3>
+    <p>Substitueix <code>IP-LOCAL</code> per la teva IP que apareix a la pàgina Xarxa de Caliu:</p>
+
+    <div class="service-grid">
+      <div class="service-row">
+        <div class="service-icon">🎬</div>
+        <div class="service-name">Jellyfin</div>
+        <div class="service-port">:8096</div>
+        <div class="service-desc">Reproductor principal. Configura les biblioteques de pel·lícules i sèries aquí.</div>
+        <div class="service-tag green">Inici aquí</div>
+      </div>
+      <div class="service-row">
+        <div class="service-icon">🔍</div>
+        <div class="service-name">Jellyseerr</div>
+        <div class="service-port">:5055</div>
+        <div class="service-desc">Portal per demanar nous continguts. Els usuaris demanen i Radarr/Sonarr els descarreguen.</div>
+        <div class="service-tag">Opcional</div>
+      </div>
+      <div class="service-row">
+        <div class="service-icon">🎥</div>
+        <div class="service-name">Radarr</div>
+        <div class="service-port">:7878</div>
+        <div class="service-desc">Gestiona i descarrega pel·lícules automàticament. Configura la qualitat desitjada.</div>
+        <div class="service-tag">Backend</div>
+      </div>
+      <div class="service-row">
+        <div class="service-icon">📺</div>
+        <div class="service-name">Sonarr</div>
+        <div class="service-port">:8989</div>
+        <div class="service-desc">Gestiona i descarrega sèries automàticament per episodis.</div>
+        <div class="service-tag">Backend</div>
+      </div>
+      <div class="service-row">
+        <div class="service-icon">🔌</div>
+        <div class="service-name">Prowlarr</div>
+        <div class="service-port">:9696</div>
+        <div class="service-desc">Gestiona els indexadors (fonts de cerca). Cal configurar-lo el primer cop.</div>
+        <div class="service-tag red">Configura primer</div>
+      </div>
+      <div class="service-row">
+        <div class="service-icon">⬇️</div>
+        <div class="service-name">qBittorrent</div>
+        <div class="service-port">:8090</div>
+        <div class="service-desc">Client de descàrregues. Pots veure l'estat de cada descàrrega aquí.</div>
+        <div class="service-tag">Backend</div>
+      </div>
+    </div>
+
+    <!-- ── PROWLARR ────────────────────────────────────────────────────── -->
+    <h2 id="prowlarr">🔌 Configurar Prowlarr (pas obligatori)</h2>
+    <p>
+      <strong>Sense indexadors configurats a Prowlarr, Radarr i Sonarr no trobaran contingut.</strong>
+      Prowlarr és el pont entre els cercadors de contingut i els gestors de descàrregues.
+    </p>
+
+    <div class="callout callout-warning">
+      <div class="callout-icon">⚠️</div>
+      <div>
+        Caliu no inclou ni recomana cap indexador concret. L'usuari és l'únic responsable del contingut al qual accedeix i de complir la legislació vigent al seu país.
+      </div>
+    </div>
+
+    <p>Per afegir indexadors a Prowlarr:</p>
+    <ol>
+      <li>Obre Prowlarr (<code>localhost:9696</code> o la URL de la pàgina Xarxa).</li>
+      <li>Ves a <strong>Indexers → Add Indexer</strong>.</li>
+      <li>Cerca i configura els indexadors que vulguis.</li>
+      <li>Un cop afegits, Radarr i Sonarr els detectaran automàticament a través de Prowlarr.</li>
+    </ol>
+
+    <!-- ── ACCÉS ───────────────────────────────────────────────────────── -->
+    <h2 id="acces">📶 Accés local vs. accés extern</h2>
+    <p>Hi ha dues maneres d'accedir als teus serveis, depenent d'on siguis:</p>
+
+    <table class="access-table">
+      <tr>
+        <th>Situació</th>
+        <th>URL a fer servir</th>
+        <th>Funciona?</th>
+        <th>Necessita Tailscale?</th>
+      </tr>
+      <tr>
+        <td>A casa, al mateix Wi-Fi</td>
+        <td><code>http://192.168.1.X:PORT</code></td>
+        <td class="yes">✓ Sí</td>
+        <td class="no">No</td>
+      </tr>
+      <tr>
+        <td>A casa, des del propi PC</td>
+        <td><code>http://localhost:PORT</code></td>
+        <td class="yes">✓ Sí</td>
+        <td class="no">No</td>
+      </tr>
+      <tr>
+        <td>Fora de casa, mòbil amb dades</td>
+        <td><code>http://192.168.1.X:PORT</code></td>
+        <td class="no">✗ No</td>
+        <td class="yes">Sí, obligatori</td>
+      </tr>
+      <tr>
+        <td>Fora de casa, altra xarxa Wi-Fi</td>
+        <td><code>http://192.168.1.X:PORT</code></td>
+        <td class="no">✗ No</td>
+        <td class="yes">Sí, obligatori</td>
+      </tr>
+      <tr>
+        <td>Amb Tailscale, des de qualsevol lloc</td>
+        <td><code>http://100.X.X.X:PORT</code></td>
+        <td class="yes">✓ Sí</td>
+        <td class="yes">Sí (ja configurat)</td>
+      </tr>
+    </table>
+
+    <!-- ── TAILSCALE ──────────────────────────────────────────────────── -->
+    <h2 id="tailscale">🔗 Configurar Tailscale (accés extern)</h2>
+    <p>
+      <a href="https://tailscale.com" target="_blank">Tailscale</a> crea una xarxa privada virtual entre tots els teus dispositius.
+      Un cop configurat, pots accedir als serveis de Caliu des de qualsevol lloc del món, com si estiguessis a casa.
+      <strong>No cal obrir ports al router ni tenir IP pública.</strong>
+    </p>
+
+    <div class="callout callout-success">
+      <div class="callout-icon">✅</div>
+      <div><strong>Tailscale és gratuït</strong> per a ús personal (fins a 3 usuaris i 100 dispositius). No hi ha límit de velocitat ni de dades.</div>
+    </div>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-n">1</div>
+        <div class="step-content">
+          <h4>Instal·la Tailscale a l'ordinador amb Caliu</h4>
+          <p>Descarrega <a href="https://tailscale.com/download/windows" target="_blank">Tailscale per Windows</a>, instal·la'l i inicia sessió amb Google, Microsoft o correu electrònic. Tailscale s'executa en segon pla.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-n">2</div>
+        <div class="step-content">
+          <h4>Anota la IP de Tailscale del teu ordinador</h4>
+          <p>A la barra de tasques, clica l'icona de Tailscale i veuràs la teva IP de Tailscale — és del format <code>100.x.x.x</code>. Anota-la.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-n">3</div>
+        <div class="step-content">
+          <h4>Instal·la Tailscale als altres dispositius</h4>
+          <p>Descarrega Tailscale al mòbil (<a href="https://tailscale.com/download/ios" target="_blank">iOS</a> / <a href="https://tailscale.com/download/android" target="_blank">Android</a>), portàtil o tablet. Inicia sessió amb el <strong>mateix compte</strong>. Activa la connexió.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-n">4</div>
+        <div class="step-content">
+          <h4>Accedeix als serveis amb la IP de Tailscale</h4>
+          <p>Des de qualsevol dispositiu amb Tailscale actiu, fes servir la IP <code>100.x.x.x</code> en lloc de la IP local.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>Com queden les URLs amb Tailscale</h3>
+    <p>Si la teva IP de Tailscale és <code>100.64.1.25</code>, les URLs serien:</p>
+
+    <div class="ip-example">
+      <span class="ip-comment"># Jellyfin (reproductor)</span><br/>
+      <span class="ip-url">http://<span class="ip-highlight">100.64.1.25</span>:8096</span><br/>
+      <br/>
+      <span class="ip-comment"># Jellyseerr (peticions)</span><br/>
+      <span class="ip-url">http://<span class="ip-highlight">100.64.1.25</span>:5055</span><br/>
+      <br/>
+      <span class="ip-comment"># Radarr · Sonarr · Prowlarr · qBittorrent</span><br/>
+      <span class="ip-url">http://<span class="ip-highlight">100.64.1.25</span>:7878</span><span class="ip-comment">  ← Radarr</span><br/>
+      <span class="ip-url">http://<span class="ip-highlight">100.64.1.25</span>:8989</span><span class="ip-comment">  ← Sonarr</span><br/>
+      <span class="ip-url">http://<span class="ip-highlight">100.64.1.25</span>:9696</span><span class="ip-comment">  ← Prowlarr</span><br/>
+      <span class="ip-url">http://<span class="ip-highlight">100.64.1.25</span>:8090</span><span class="ip-comment">  ← qBittorrent</span>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">💡</div>
+      <div>
+        <strong>Consell:</strong> Guarda les URLs de Tailscale als marcadors del navegador del teu mòbil per accedir-hi ràpidament. Les URLs de Tailscale sempre funcionen, tant si ets a casa com fora.
+      </div>
+    </div>
+
+    <h3>Tailscale i la VPN de Caliu</h3>
+    <p>
+      Tailscale i la VPN de les descàrregues de Caliu (ProtonVPN/Mullvad via Gluetun) <strong>no interfereixen entre elles</strong>.
+      Tailscale és per accedir remotament als serveis.
+      La VPN de Caliu és perquè les <em>descàrregues de qBittorrent</em> surtin xifrades.
+      Pots tenir les dues actives simultàniament sense cap problema.
+    </p>
+
+    <!-- CTA final -->
+    <div style="margin-top:64px;padding:40px;background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:20px;text-align:center;">
+      <div style="font-size:2rem;margin-bottom:12px;">🔥</div>
+      <h3 style="color:#fff;font-size:1.3rem;font-weight:800;margin-bottom:8px;">Ja tens tot el que necessites</h3>
+      <p style="color:#94a3b8;font-size:0.9rem;margin-bottom:24px;">Descarrega Caliu i tingues el teu Netflix casolà en menys de 5 minuts.</p>
+      <a href="https://github.com/danipardog/caliu/releases/latest" class="btn btn-primary">⬇ Descarregar Caliu</a>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  /* Highlight active sidebar link on scroll */
+  const sections = document.querySelectorAll('h2[id]');
+  const links = document.querySelectorAll('.sidebar-nav a');
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.sidebar-nav a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => obs.observe(s));
+</script>
+
+</body>
+</html>

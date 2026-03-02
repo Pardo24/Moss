@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caliu — El teu Netflix casolà, sense subscripcions</title>
+  <meta name="description" content="Caliu instal·la i gestiona Jellyfin, Radarr, Sonarr i qBittorrent en un clic. El teu servidor multimèdia gratuït per a Windows." />
+  <meta property="og:title" content="Caliu — El teu Netflix casolà" />
+  <meta property="og:description" content="Servidor multimèdia gratuït per a casa. Instal·lació en 1 clic. Sense subscripcions, sense límits." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Tokens ──────────────────────────────────────────────────────── */
+    :root {
+      --accent:   #f97316;
+      --accent-d: #ea6c09;
+      --accent-g: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+      --text:     #0f172a;
+      --text-2:   #64748b;
+      --text-3:   #94a3b8;
+      --surface:  #ffffff;
+      --border:   rgba(15, 23, 42, 0.08);
+      --shadow-sm:0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md:0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+      --shadow-lg:0 16px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+      --r-sm: 10px;
+      --r-md: 16px;
+      --r-lg: 22px;
+    }
+
+    /* ─── Reset & base ────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fafbff;
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    /* ─── Layout ──────────────────────────────────────────────────────── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+    /* ─── Scroll animations ───────────────────────────────────────────── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s cubic-bezier(0.16,1,0.3,1), transform 0.65s cubic-bezier(0.16,1,0.3,1);
+    }
+    .fade-up.visible { opacity: 1; transform: none; }
+    .fade-up.delay-1 { transition-delay: 0.1s; }
+    .fade-up.delay-2 { transition-delay: 0.2s; }
+    .fade-up.delay-3 { transition-delay: 0.3s; }
+
+    /* ─── Buttons ─────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 28px; border-radius: var(--r-sm);
+      font-family: inherit; font-weight: 700; font-size: 0.95rem;
+      cursor: pointer; border: none;
+      transition: all 0.18s cubic-bezier(0.16,1,0.3,1);
+      text-decoration: none; white-space: nowrap;
+    }
+    .btn-primary { background: var(--accent-g); color: #fff; box-shadow: 0 4px 16px rgba(249,115,22,0.38); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(249,115,22,0.46); }
+    .btn-outline { background: var(--surface); color: var(--text); border: 1.5px solid var(--border); box-shadow: var(--shadow-sm); }
+    .btn-outline:hover { border-color: rgba(0,0,0,0.16); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+    /* ─── Badges ──────────────────────────────────────────────────────── */
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.03em; }
+    .badge-orange { background: rgba(249,115,22,0.1); color: var(--accent); border: 1px solid rgba(249,115,22,0.2); }
+    .badge-green  { background: rgba(34,197,94,0.1);  color: #16a34a; border: 1px solid rgba(34,197,94,0.2); }
+
+    /* ─── Cards ───────────────────────────────────────────────────────── */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-md); padding: 32px; }
+    .card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); transition: all 0.2s; }
+
+    /* ─── Section shared ──────────────────────────────────────────────── */
+    section { padding: 96px 0; }
+    .section-eyebrow { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 12px; }
+    .section-title { font-size: clamp(1.9rem, 4vw, 2.8rem); font-weight: 900; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 18px; }
+    .section-desc { font-size: 1.05rem; color: var(--text-2); line-height: 1.75; max-width: 520px; }
+
+    /* ─── Header ──────────────────────────────────────────────────────── */
+    header { position: sticky; top: 0; z-index: 200; background: rgba(250,251,255,0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+    .header-inner { height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 1.25rem; letter-spacing: -0.02em; color: var(--text); }
+    .logo-mark { width: 36px; height: 36px; border-radius: 10px; background: var(--accent-g); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(249,115,22,0.32); flex-shrink: 0; }
+    nav { display: flex; align-items: center; gap: 32px; }
+    nav a { font-size: 0.88rem; font-weight: 500; color: var(--text-2); transition: color 0.15s; }
+    nav a:hover { color: var(--text); }
+    .nav-cta { display: flex; align-items: center; gap: 10px; }
+
+    /* ─── Lang switcher ───────────────────────────────────────────────── */
+    .lang-switch { display: flex; align-items: center; gap: 3px; }
+    .lang-btn { background: none; border: 1.5px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 0.7rem; font-weight: 700; color: var(--text-2); cursor: pointer; font-family: inherit; letter-spacing: 0.04em; transition: all 0.15s; }
+    .lang-btn:hover { color: var(--text); border-color: rgba(0,0,0,0.2); }
+    .lang-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* ─── Hero ────────────────────────────────────────────────────────── */
+    .hero {
+      padding: 96px 0 80px; position: relative; overflow: hidden; text-align: center;
+      background:
+        radial-gradient(ellipse 70% 60% at 15% 20%, rgba(249,115,22,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 70% at 85% 70%, rgba(99,102,241,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 40% at 50% 100%, rgba(249,115,22,0.04) 0%, transparent 60%);
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(15,23,42,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.035) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+      pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 1; }
+    .hero h1 { font-size: clamp(2.8rem, 7vw, 5rem); font-weight: 900; line-height: 1.06; letter-spacing: -0.04em; margin-bottom: 28px; }
+    .hero h1 .gradient-text { background: linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fbbf24 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-sub { font-size: 1.2rem; color: var(--text-2); max-width: 520px; margin: 0 auto 40px; line-height: 1.75; font-weight: 400; }
+    .hero-buttons { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+    .hero-note { font-size: 0.8rem; color: var(--text-3); }
+
+    /* ─── Mockup ──────────────────────────────────────────────────────── */
+    .mockup-wrapper { margin: 64px auto 0; max-width: 760px; position: relative; }
+    .mockup-wrapper::before { content: ''; position: absolute; inset: -40px; background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(249,115,22,0.12) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+    .mockup { position: relative; z-index: 1; border-radius: 20px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.8); transform: perspective(1400px) rotateX(4deg) rotateY(-1deg); transition: transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+    .mockup:hover { transform: perspective(1400px) rotateX(1deg) rotateY(0deg) scale(1.01); }
+    .mockup-bar { height: 38px; background: rgba(248,250,252,0.97); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 7px; }
+    .dot { width: 11px; height: 11px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: #28c840; }
+    .mockup-url { margin-left: 12px; background: rgba(0,0,0,0.05); border-radius: 6px; padding: 3px 14px; font-size: 0.72rem; color: var(--text-3); font-family: 'SF Mono', 'Consolas', monospace; flex: 1; max-width: 260px; text-align: center; }
+    .mockup-body { display: flex; height: 320px; background: #f6f8ff; }
+    .m-sidebar { width: 72px; background: #ffffff; border-right: 1px solid rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center; padding: 16px 0; gap: 2px; }
+    .m-logo { width: 34px; height: 34px; border-radius: 10px; background: var(--accent-g); display: flex; align-items: center; justify-content: center; font-size: 1.05rem; box-shadow: 0 3px 8px rgba(249,115,22,0.28); margin-bottom: 14px; }
+    .m-nav { width: 100%; padding: 10px 0; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 0.55rem; font-weight: 700; color: #94a3b8; border-left: 3px solid transparent; letter-spacing: 0.02em; text-transform: uppercase; cursor: default; }
+    .m-nav span:first-child { font-size: 0.95rem; }
+    .m-nav.active { color: var(--accent); background: rgba(249,115,22,0.07); border-left-color: var(--accent); }
+    .m-lang { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 2px; padding-bottom: 8px; }
+    .m-lang span { font-size: 0.52rem; font-weight: 700; color: #cbd5e1; font-family: monospace; }
+    .m-lang span.al { color: var(--accent); }
+    .m-content { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .m-status { background: #fff; border: 1px solid rgba(0,0,0,0.07); border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; }
+    .m-badge { display: inline-flex; align-items: center; gap: 5px; background: #dcfce7; color: #15803d; padding: 3px 10px; border-radius: 99px; font-size: 0.65rem; font-weight: 700; }
+    .m-badge::before { content:''; width:6px; height:6px; border-radius:50%; background:#22c55e; }
+    .m-stopbtn { padding: 4px 12px; border-radius: 7px; background: rgba(220,38,38,0.08); color: #dc2626; font-size: 0.62rem; font-weight: 700; }
+    .m-refresh { padding: 4px 8px; border-radius: 7px; background: rgba(0,0,0,0.04); color: #94a3b8; font-size: 0.65rem; margin-left: 4px; }
+    .m-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; }
+    .m-card { background: #fff; border: 1px solid rgba(0,0,0,0.07); border-radius: 10px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.55rem; font-weight: 700; color: #64748b; letter-spacing: 0.01em; }
+    .m-path { font-size: 0.56rem; color: #cbd5e1; font-family: monospace; padding: 0 2px; }
+
+    /* ─── Stats bar ───────────────────────────────────────────────────── */
+    .stats-bar { display: flex; justify-content: center; flex-wrap: wrap; background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; min-width: 160px; padding: 32px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-num { font-size: 2.2rem; font-weight: 900; letter-spacing: -0.04em; line-height: 1; margin-bottom: 6px; background: var(--accent-g); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .stat-label { font-size: 0.82rem; color: var(--text-2); font-weight: 500; }
+
+    /* ─── Feature grid ────────────────────────────────────────────────── */
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    @media(max-width: 820px) { .features-grid { grid-template-columns: 1fr; } }
+    .feature-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+    .fi-orange { background: var(--accent-g); }
+    .fi-indigo { background: linear-gradient(135deg,#6366f1,#818cf8); }
+    .fi-green  { background: linear-gradient(135deg,#22c55e,#4ade80); }
+    .fi-blue   { background: linear-gradient(135deg,#3b82f6,#60a5fa); }
+    .fi-rose   { background: linear-gradient(135deg,#f43f5e,#fb7185); }
+    .fi-amber  { background: linear-gradient(135deg,#f59e0b,#fbbf24); }
+    .feature-title { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .feature-desc  { font-size: 0.88rem; color: var(--text-2); line-height: 1.65; }
+
+    /* ─── Services pills ──────────────────────────────────────────────── */
+    .pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .pill { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 99px; font-size: 0.875rem; font-weight: 600; box-shadow: var(--shadow-sm); transition: all 0.15s; }
+    .pill:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+    /* ─── Steps ───────────────────────────────────────────────────────── */
+    .steps { display: flex; flex-direction: column; }
+    .step { display: flex; gap: 20px; padding-bottom: 32px; position: relative; }
+    .step:not(:last-child)::before { content: ''; position: absolute; left: 19px; top: 42px; width: 2px; height: calc(100% - 14px); background: linear-gradient(to bottom, var(--accent), rgba(249,115,22,0.08)); }
+    .step-num { width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; background: var(--accent-g); color: #fff; font-weight: 800; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(249,115,22,0.32); }
+    .step-body { padding-top: 8px; }
+    .step-body h4 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .step-body p  { font-size: 0.88rem; color: var(--text-2); line-height: 1.6; }
+    .how-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+    @media(max-width:800px){ .how-layout{ grid-template-columns:1fr; gap:48px; } }
+
+    /* ─── VPN section ─────────────────────────────────────────────────── */
+    .vpn-card { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid rgba(34,197,94,0.22); border-radius: var(--r-lg); padding: 40px; display: flex; gap: 36px; align-items: flex-start; box-shadow: 0 8px 32px rgba(34,197,94,0.08); }
+    @media(max-width:640px){ .vpn-card{ flex-direction:column; padding:28px; gap:24px; } }
+    .vpn-icon { width: 68px; height: 68px; flex-shrink: 0; border-radius: 18px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 2.1rem; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .vpn-features { display: flex; flex-direction: column; gap: 8px; margin: 16px 0 24px; }
+    .vpn-feature { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; color: #166534; font-weight: 500; }
+    .vpn-feature::before { content: '✓'; font-weight: 800; color: #16a34a; }
+
+    /* ─── FAQ ─────────────────────────────────────────────────────────── */
+    .faq { display: flex; flex-direction: column; gap: 12px; }
+    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+    .faq-q { width: 100%; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; background: none; border: none; font-family: inherit; font-size: 0.95rem; font-weight: 600; color: var(--text); cursor: pointer; text-align: left; gap: 16px; }
+    .faq-q:hover { background: rgba(0,0,0,0.02); }
+    .faq-arrow { font-size: 0.8rem; color: var(--text-3); flex-shrink: 0; transition: transform 0.2s; }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); }
+    .faq-a { display: none; padding: 16px 24px 18px; font-size: 0.88rem; color: var(--text-2); line-height: 1.7; border-top: 1px solid var(--border); }
+    .faq-item.open .faq-a { display: block; }
+
+    /* ─── CTA section ─────────────────────────────────────────────────── */
+    .cta-section { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 96px 0; text-align: center; position: relative; overflow: hidden; }
+    .cta-section::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 60% at 20% 50%, rgba(249,115,22,0.18) 0%, transparent 60%), radial-gradient(ellipse 50% 60% at 80% 50%, rgba(99,102,241,0.12) 0%, transparent 60%); pointer-events: none; }
+    .cta-section h2 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900; letter-spacing: -0.03em; color: #fff; margin-bottom: 16px; }
+    .cta-section p { color: #94a3b8; font-size: 1.05rem; margin-bottom: 40px; }
+    .cta-section .btn-primary { font-size: 1.05rem; padding: 16px 42px; }
+    .cta-note { margin-top: 16px; font-size: 0.8rem; color: #64748b; }
+
+    /* ─── Footer ──────────────────────────────────────────────────────── */
+    footer { background: #0f172a; border-top: 1px solid rgba(255,255,255,0.06); padding: 48px 0 32px; }
+    .footer-inner { display: flex; justify-content: space-between; align-items: flex-start; gap: 48px; flex-wrap: wrap; margin-bottom: 40px; }
+    .footer-brand { display: flex; flex-direction: column; gap: 10px; }
+    .footer-logo { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 1.1rem; color: #fff; }
+    .footer-tagline { font-size: 0.82rem; color: #64748b; max-width: 220px; line-height: 1.6; }
+    .footer-links { display: flex; flex-direction: column; gap: 10px; }
+    .footer-links h4 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; margin-bottom: 4px; }
+    .footer-links a { font-size: 0.85rem; color: #64748b; transition: color 0.15s; }
+    .footer-links a:hover { color: #94a3b8; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .footer-bottom p { font-size: 0.8rem; color: #475569; }
+    .footer-bottom a { color: #64748b; }
+    .footer-bottom a:hover { color: #94a3b8; }
+
+    /* ─── Divider ─────────────────────────────────────────────────────── */
+    .divider { width: 100%; height: 1px; background: var(--border); }
+
+    /* ─── Responsive ──────────────────────────────────────────────────── */
+    @media(max-width: 900px) {
+      .hide-sm { display: none; }
+      .hero { padding: 72px 0 64px; }
+      section { padding: 72px 0; }
+    }
+    @media(max-width: 600px) {
+      .hero h1 { font-size: 2.4rem; }
+      .btn { padding: 12px 22px; font-size: 0.9rem; }
+      .stat { min-width: 140px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="container header-inner">
+    <div class="logo">
+      <div class="logo-mark">🔥</div>
+      Caliu
+    </div>
+
+    <nav class="hide-sm">
+      <a href="#features" data-i18n="nav_features">Característiques</a>
+      <a href="#how" data-i18n="nav_how">Com funciona</a>
+      <a href="#vpn">VPN</a>
+      <a href="#faq">FAQ</a>
+      <a href="guia.html" data-i18n="nav_guide">Guia</a>
+      <a href="https://github.com/Pardo24/caliu" target="_blank">GitHub</a>
+    </nav>
+
+    <div class="nav-cta">
+      <div class="lang-switch hide-sm">
+        <button class="lang-btn" data-lang="ca" onclick="setLang('ca')">CA</button>
+        <button class="lang-btn" data-lang="es" onclick="setLang('es')">ES</button>
+        <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+      </div>
+      <a href="#download" class="btn btn-primary" style="padding:9px 20px;font-size:0.85rem;" data-i18n="nav_download">
+        Descarregar
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container hero-content">
+    <div class="badge badge-orange" style="margin-bottom:24px;" data-i18n="hero_badge">
+      ✦ Gratuït &nbsp;·&nbsp; Codi obert &nbsp;·&nbsp; Windows
+    </div>
+
+    <h1 data-i18n="hero_title">
+      El teu<br/>
+      <span class="gradient-text">Netflix casolà</span><br/>
+      sense subscripcions
+    </h1>
+
+    <p class="hero-sub" data-i18n="hero_sub">
+      Un instal·lador que configura Jellyfin, Radarr, Sonarr, qBittorrent i més
+      en el teu ordinador en menys de 5 minuts. Sense comandos, sense complicacions.
+    </p>
+
+    <div class="hero-buttons">
+      <a href="#download" class="btn btn-primary" style="font-size:1rem;padding:15px 36px;" data-i18n="hero_btn_dl">
+        Descarregar Caliu — gratis
+      </a>
+      <a href="https://github.com/Pardo24/caliu" target="_blank" class="btn btn-outline" data-i18n="hero_btn_gh">
+        ⭐&nbsp; Veure a GitHub
+      </a>
+    </div>
+    <p class="hero-note" data-i18n="hero_note">Windows 10 / 11 &nbsp;·&nbsp; x64 &nbsp;·&nbsp; Requereix Docker Desktop (gratuït)</p>
+
+    <div class="mockup-wrapper fade-up">
+      <div class="mockup">
+        <div class="mockup-bar">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+          <div class="mockup-url">caliu · Dashboard</div>
+        </div>
+        <div class="mockup-body">
+          <div class="m-sidebar">
+            <div class="m-logo">🔥</div>
+            <div class="m-nav active"><span>🏠</span><span data-i18n="mock_nav_home">INICI</span></div>
+            <div class="m-nav"><span>🔒</span><span data-i18n="mock_nav_vpn">VPN</span></div>
+            <div class="m-nav"><span>🌐</span><span data-i18n="mock_nav_net">XARXA</span></div>
+            <div class="m-nav"><span>⚙️</span><span data-i18n="mock_nav_cfg">CONFIG</span></div>
+            <div class="m-lang"><span class="al">CA</span><span>ES</span><span>EN</span></div>
+          </div>
+          <div class="m-content">
+            <div class="m-status">
+              <div class="m-badge" data-i18n="mock_running">En marxa</div>
+              <div style="display:flex;gap:4px;">
+                <div class="m-stopbtn" data-i18n="mock_stop">Parar</div>
+                <div class="m-refresh">↻</div>
+              </div>
+            </div>
+            <div class="m-grid">
+              <div class="m-card"><span style="font-size:1.1rem">🎬</span>Jellyfin<span style="color:#22c55e;font-size:0.5rem" data-i18n="mock_active">● actiu</span></div>
+              <div class="m-card"><span style="font-size:1.1rem">🔍</span>Jellyseerr<span style="color:#22c55e;font-size:0.5rem" data-i18n="mock_active">● actiu</span></div>
+              <div class="m-card"><span style="font-size:1.1rem">🎥</span>Radarr<span style="color:#22c55e;font-size:0.5rem" data-i18n="mock_active">● actiu</span></div>
+              <div class="m-card"><span style="font-size:1.1rem">📺</span>Sonarr<span style="color:#22c55e;font-size:0.5rem" data-i18n="mock_active">● actiu</span></div>
+              <div class="m-card"><span style="font-size:1.1rem">🔌</span>Prowlarr<span style="color:#22c55e;font-size:0.5rem" data-i18n="mock_active">● actiu</span></div>
+              <div class="m-card"><span style="font-size:1.1rem">⬇️</span>qBit<span style="color:#22c55e;font-size:0.5rem" data-i18n="mock_active">● actiu</span></div>
+            </div>
+            <div class="m-path">📁 D:\media\caliu</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat fade-up"><div class="stat-num">6</div><div class="stat-label" data-i18n="stat1">Serveis integrats</div></div>
+  <div class="stat fade-up delay-1"><div class="stat-num">1</div><div class="stat-label" data-i18n="stat2">Clic per instal·lar</div></div>
+  <div class="stat fade-up delay-2"><div class="stat-num">0€</div><div class="stat-label" data-i18n="stat3">Cost de llicència</div></div>
+  <div class="stat fade-up delay-3"><div class="stat-num">3</div><div class="stat-label" data-i18n="stat4">Idiomes inclosos</div></div>
+</div>
+
+<!-- PILLS -->
+<section style="padding:64px 0;">
+  <div class="container" style="text-align:center;">
+    <p class="section-eyebrow" data-i18n="pills_eyebrow">Tot inclòs</p>
+    <h2 class="section-title" style="margin-bottom:40px;" data-i18n="pills_title">Tots els serveis, configurats per tu</h2>
+    <div class="pills">
+      <div class="pill"><span>🎬</span> Jellyfin <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_jellyfin">Reproductor</span></div>
+      <div class="pill"><span>🔍</span> Jellyseerr <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_jellyseerr">Peticions</span></div>
+      <div class="pill"><span>🎥</span> Radarr <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_radarr">Pel·lícules</span></div>
+      <div class="pill"><span>📺</span> Sonarr <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_sonarr">Sèries</span></div>
+      <div class="pill"><span>🔌</span> Prowlarr <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_prowlarr">Indexadors</span></div>
+      <div class="pill"><span>⬇️</span> qBittorrent <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_qbit">Descàrregues</span></div>
+      <div class="pill"><span>🔒</span> Gluetun <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_gluetun">VPN opcional</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div style="text-align:center;max-width:560px;margin:0 auto 56px;">
+      <p class="section-eyebrow fade-up" data-i18n="feat_eyebrow">Per què Caliu?</p>
+      <h2 class="section-title fade-up delay-1" data-i18n="feat_title">Tot el que necessites,<br/>sense la complexitat</h2>
+    </div>
+    <div class="features-grid">
+      <div class="card fade-up">
+        <div class="feature-icon fi-orange">🎬</div>
+        <div class="feature-title" data-i18n="feat1_title">El teu propi Netflix</div>
+        <div class="feature-desc" data-i18n="feat1_desc">Jellyfin t'ofereix una interfície elegant per veure pel·lícules i sèries des de qualsevol dispositiu — TV, mòbil, tablet, navegador.</div>
+      </div>
+      <div class="card fade-up delay-1">
+        <div class="feature-icon fi-indigo">🌐</div>
+        <div class="feature-title" data-i18n="feat2_title">Accés des de qualsevol lloc</div>
+        <div class="feature-desc" data-i18n="feat2_desc">Caliu mostra les URLs de tots els serveis per la xarxa local. Per accés extern sense obrir ports, s'integra fàcilment amb Tailscale.</div>
+      </div>
+      <div class="card fade-up delay-2">
+        <div class="feature-icon fi-green">🔒</div>
+        <div class="feature-title" data-i18n="feat3_title">VPN integrada</div>
+        <div class="feature-desc" data-i18n="feat3_desc">Activa ProtonVPN o Mullvad des del dashboard en un formulari senzill. Les descàrregues passaran per un túnel xifrat automàticament.</div>
+      </div>
+      <div class="card fade-up">
+        <div class="feature-icon fi-blue">⚡</div>
+        <div class="feature-title" data-i18n="feat4_title">Instal·lació en 1 clic</div>
+        <div class="feature-desc" data-i18n="feat4_desc">L'assistent de Caliu configura tota la infraestructura Docker automàticament. Sense fitxers de configuració, sense comandes de terminal.</div>
+      </div>
+      <div class="card fade-up delay-1">
+        <div class="feature-icon fi-rose">🛠️</div>
+        <div class="feature-title" data-i18n="feat5_title">Dashboard de gestió</div>
+        <div class="feature-desc" data-i18n="feat5_desc">Atura i arrenca el stack, gestiona la VPN, consulta les URLs de la xarxa i configura l'idioma des d'una interfície unificada.</div>
+      </div>
+      <div class="card fade-up delay-2">
+        <div class="feature-icon fi-amber">🌍</div>
+        <div class="feature-title" data-i18n="feat6_title">3 idiomes inclosos</div>
+        <div class="feature-desc" data-i18n="feat6_desc">Caliu és disponible en català, castellà i anglès. Canvia d'idioma en qualsevol moment des del panell lateral, sense reiniciar.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="container how-layout">
+    <div class="fade-up">
+      <p class="section-eyebrow" data-i18n="how_eyebrow">Com funciona</p>
+      <h2 class="section-title" data-i18n="how_title">Llest en 5 minuts</h2>
+      <p class="section-desc" data-i18n="how_desc">L'instal·lador et guia pas a pas. No cal tenir cap coneixement tècnic — si pots instal·lar un programa normal, pots instal·lar Caliu.</p>
+      <div style="margin-top:32px;">
+        <a href="#download" class="btn btn-primary" data-i18n="how_btn">Descarregar ara</a>
+      </div>
+    </div>
+    <div class="steps fade-up delay-1">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4 data-i18n="step1_title">Descarrega i executa Caliu</h4>
+          <p data-i18n="step1_desc">Un únic fitxer <code style="background:rgba(0,0,0,0.06);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:0.85em;">.exe</code>. Doble clic i l'assistent s'obre. Crea drecera a l'Escriptori i a l'Inici automàticament.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4 data-i18n="step2_title">Instal·la Docker Desktop</h4>
+          <p data-i18n="step2_desc">Si no el tens, Caliu t'hi redirigeix directament. Docker és el motor que executa tots els serveis. És gratuït i oficial de Microsoft.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4 data-i18n="step3_title">Tria on guardar els fitxers</h4>
+          <p data-i18n="step3_desc">Selecciona una carpeta al teu disc dur o disc extern. Necessites almenys 100 GB lliures. Caliu no toca res que ja hi hagi.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4 data-i18n="step4_title">Gaudeix del teu Netflix casolà</h4>
+          <p data-i18n="step4_desc">Caliu arrenca tot el stack automàticament. Obre Jellyfin, afegeix indexadors a Prowlarr i comença a descarregar.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- VPN -->
+<section id="vpn">
+  <div class="container">
+    <div style="text-align:center;max-width:560px;margin:0 auto 48px;" class="fade-up">
+      <p class="section-eyebrow" data-i18n="vpn_eyebrow">Privacitat recomanada</p>
+      <h2 class="section-title" data-i18n="vpn_title">Protegeix les teves descàrregues</h2>
+      <p class="section-desc" style="margin:0 auto;" data-i18n="vpn_desc">Una VPN amaga les teves descàrregues del teu proveïdor d'internet. Caliu la integra en un sol pas, sense configuració extra.</p>
+    </div>
+    <div class="vpn-card fade-up">
+      <div class="vpn-icon">🛡️</div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
+          <h3 style="font-size:1.35rem;font-weight:900;color:#15803d;">ProtonVPN</h3>
+          <span class="badge badge-green" data-i18n="vpn_badge">Recomanat per Caliu</span>
+        </div>
+        <p style="color:#166534;font-size:0.9rem;line-height:1.7;" data-i18n="vpn_card_desc">
+          ProtonVPN funciona perfectament amb Gluetun (el motor VPN de Caliu) via WireGuard.
+          Té pla gratuït i plans de pagament des de 4€/mes. Creat per la mateixa empresa que ProtonMail, amb seu a Suïssa i política de zero registres.
+        </p>
+        <div class="vpn-features">
+          <div class="vpn-feature" data-i18n="vpn_feat1">Compatible amb Caliu via WireGuard</div>
+          <div class="vpn-feature" data-i18n="vpn_feat2">Pla gratuït disponible (sense targeta)</div>
+          <div class="vpn-feature" data-i18n="vpn_feat3">Política de zero registres auditada</div>
+          <div class="vpn-feature" data-i18n="vpn_feat4">Seu a Suïssa — màxima protecció legal</div>
+          <div class="vpn-feature" data-i18n="vpn_feat5">Des de 4€/mes en el pla anual</div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <a href="https://go.getproton.me/aff_c?offer_id=26&aff_id=7925" target="_blank" rel="noopener"
+             class="btn btn-primary" style="background:linear-gradient(135deg,#16a34a,#22c55e);box-shadow:0 4px 16px rgba(34,197,94,0.35);font-size:0.9rem;padding:12px 26px;"
+             data-i18n="vpn_btn">Obtenir ProtonVPN →</a>
+          <a href="https://mullvad.net" target="_blank" rel="noopener"
+             class="btn btn-outline" style="font-size:0.9rem;padding:12px 22px;"
+             data-i18n="vpn_alt">Mullvad (alternativa)</a>
+        </div>
+        <p style="font-size:0.72rem;color:#6b7280;margin-top:14px;line-height:1.6;" data-i18n="vpn_disclaimer">
+          ⚠️ L'ús de Caliu i de les descàrregues és responsabilitat exclusiva de l'usuari. Compleix la legislació vigent al teu país.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div style="text-align:center;max-width:560px;margin:0 auto 48px;" class="fade-up">
+      <p class="section-eyebrow" data-i18n="faq_eyebrow">Preguntes freqüents</p>
+      <h2 class="section-title" data-i18n="faq_title">Tens dubtes?</h2>
+    </div>
+    <div class="faq" style="max-width:720px;margin:0 auto;">
+      <div class="faq-item fade-up">
+        <button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq1_q">Cal tenir coneixements tècnics per instal·lar Caliu?</span><span class="faq-arrow">▼</span></button>
+        <div class="faq-a" data-i18n="faq1_a">No. L'assistent de Caliu guia l'usuari pas a pas. Si pots instal·lar un programa com VLC o Spotify, pots instal·lar Caliu sense cap problema.</div>
+      </div>
+      <div class="faq-item fade-up delay-1">
+        <button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq2_q">Funciona a Mac o Linux?</span><span class="faq-arrow">▼</span></button>
+        <div class="faq-a" data-i18n="faq2_a">De moment, Caliu (l'aplicació d'escriptori) és exclusiva de Windows 10/11. El propi stack de serveis (Docker) funciona a qualsevol plataforma, però l'instal·lador és per a Windows. Suport Mac/Linux és possible en versions futures.</div>
+      </div>
+      <div class="faq-item fade-up delay-2">
+        <button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq3_q">L'ordinador ha d'estar sempre engegat?</span><span class="faq-arrow">▼</span></button>
+        <div class="faq-a" data-i18n="faq3_a">Sí. Per accedir als teus continguts des d'altres dispositius, l'ordinador on s'executa Caliu ha d'estar encès. Per a un ús continu, es recomana tenir-lo connectat per cable Ethernet i configurar Windows perquè no es suspengui.</div>
+      </div>
+      <div class="faq-item fade-up">
+        <button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq4_q">Quant d'espai ocupen els serveis?</span><span class="faq-arrow">▼</span></button>
+        <div class="faq-a" data-i18n="faq4_a">Les imatges Docker dels 6 serveis ocupen aproximadament 3-4 GB. El contingut multimèdia que descarreguis ocuparà tant espai com vulguis al disc que triïs. Es recomana un disc dur de com a mínim 1 TB per al contingut.</div>
+      </div>
+      <div class="faq-item fade-up delay-1">
+        <button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq5_q">És gratuït per sempre?</span><span class="faq-arrow">▼</span></button>
+        <div class="faq-a" data-i18n="faq5_a">Sí. Caliu és programari de codi obert sota llicència MIT. No hi ha versions premium, subscripcions ni funcions de pagament. Els serveis que instal·la (Jellyfin, Radarr, Sonarr, etc.) també són gratuïts i de codi obert.</div>
+      </div>
+      <div class="faq-item fade-up delay-2">
+        <button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq6_q">Puc accedir als meus continguts fora de casa?</span><span class="faq-arrow">▼</span></button>
+        <div class="faq-a" data-i18n="faq6_a">Sí. La forma més senzilla és instal·lar Tailscale (gratuït) al teu ordinador i als dispositius que facis servir. Tailscale crea una xarxa privada virtual entre els teus dispositius sense que hagis d'obrir ports al router.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="download">
+  <div class="container" style="position:relative;z-index:1;">
+    <div class="logo-mark" style="width:76px;height:76px;border-radius:22px;font-size:2.4rem;margin:0 auto 28px;box-shadow:0 12px 32px rgba(249,115,22,0.38);">🔥</div>
+    <h2 data-i18n="cta_title">Comença avui. És gratis.</h2>
+    <p data-i18n="cta_sub">Descarrega Caliu i tingues el teu Netflix casolà en 5 minuts.</p>
+    <a href="https://github.com/Pardo24/caliu/releases/latest" class="btn btn-primary" data-i18n="cta_btn">
+      Descarregar Caliu per Windows
+    </a>
+    <p class="cta-note" data-i18n="cta_note">Windows 10 / 11 &nbsp;·&nbsp; x64 &nbsp;·&nbsp; v1.0.4 &nbsp;·&nbsp; Docker Desktop necessari (gratuït)</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="logo-mark" style="width:30px;height:30px;border-radius:8px;font-size:0.9rem;">🔥</div>
+          Caliu
+        </div>
+        <div class="footer-tagline" data-i18n="footer_tagline">El teu servidor multimèdia de codi obert. Gratuït per sempre.</div>
+      </div>
+      <div class="footer-links">
+        <h4 data-i18n="footer_col1">Projecte</h4>
+        <a href="https://github.com/Pardo24/caliu" target="_blank">GitHub</a>
+        <a href="https://github.com/Pardo24/caliu/releases" target="_blank" data-i18n="footer_releases">Versions</a>
+        <a href="guia.html" data-i18n="footer_guide_link">Guia d'usuari</a>
+        <a href="https://github.com/Pardo24/caliu/issues" target="_blank" data-i18n="footer_issues">Reportar error</a>
+      </div>
+      <div class="footer-links">
+        <h4 data-i18n="footer_col2">Eines recomanades</h4>
+        <a href="https://go.getproton.me/aff_c?offer_id=26&aff_id=7925" target="_blank" rel="noopener">ProtonVPN</a>
+        <a href="https://mullvad.net" target="_blank">Mullvad VPN</a>
+        <a href="https://tailscale.com" target="_blank">Tailscale</a>
+        <a href="https://www.docker.com/products/docker-desktop/" target="_blank">Docker Desktop</a>
+      </div>
+      <div class="footer-links">
+        <h4 data-i18n="footer_col3">Serveis</h4>
+        <a href="https://jellyfin.org" target="_blank">Jellyfin</a>
+        <a href="https://jellyseerr.dev" target="_blank">Jellyseerr</a>
+        <a href="https://radarr.video" target="_blank">Radarr</a>
+        <a href="https://sonarr.tv" target="_blank">Sonarr</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Caliu · <a href="https://github.com/Pardo24/caliu/blob/main/LICENSE">MIT License</a></p>
+      <p style="font-size:0.75rem;" data-i18n="footer_disclaimer">Alguns enllaços poden ser de referit. Caliu no s'associa amb cap dels serveis que menciona.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── Translations ─────────────────────────────────────────────────────────── */
+const i18n = {
+  ca: {
+    nav_features:"Característiques", nav_how:"Com funciona", nav_guide:"Guia", nav_download:"Descarregar",
+    hero_badge:"✦ Gratuït &nbsp;·&nbsp; Codi obert &nbsp;·&nbsp; Windows",
+    hero_title:'El teu<br/><span class="gradient-text">Netflix casolà</span><br/>sense subscripcions',
+    hero_sub:"Un instal·lador que configura Jellyfin, Radarr, Sonarr, qBittorrent i més en el teu ordinador en menys de 5 minuts. Sense comandos, sense complicacions.",
+    hero_btn_dl:"Descarregar Caliu — gratis", hero_btn_gh:"⭐&nbsp; Veure a GitHub",
+    hero_note:"Windows 10 / 11 &nbsp;·&nbsp; x64 &nbsp;·&nbsp; Requereix Docker Desktop (gratuït)",
+    mock_running:"En marxa", mock_stop:"Parar", mock_active:"● actiu",
+    mock_nav_home:"INICI", mock_nav_vpn:"VPN", mock_nav_net:"XARXA", mock_nav_cfg:"CONFIG",
+    stat1:"Serveis integrats", stat2:"Clic per instal·lar", stat3:"Cost de llicència", stat4:"Idiomes inclosos",
+    pills_eyebrow:"Tot inclòs", pills_title:"Tots els serveis, configurats per tu",
+    pill_jellyfin:"Reproductor", pill_jellyseerr:"Peticions", pill_radarr:"Pel·lícules", pill_sonarr:"Sèries", pill_prowlarr:"Indexadors", pill_qbit:"Descàrregues", pill_gluetun:"VPN opcional",
+    feat_eyebrow:"Per què Caliu?", feat_title:"Tot el que necessites,<br/>sense la complexitat",
+    feat1_title:"El teu propi Netflix", feat1_desc:"Jellyfin t'ofereix una interfície elegant per veure pel·lícules i sèries des de qualsevol dispositiu — TV, mòbil, tablet, navegador.",
+    feat2_title:"Accés des de qualsevol lloc", feat2_desc:"Caliu mostra les URLs de tots els serveis per la xarxa local. Per accés extern sense obrir ports, s'integra fàcilment amb Tailscale.",
+    feat3_title:"VPN integrada", feat3_desc:"Activa ProtonVPN o Mullvad des del dashboard en un formulari senzill. Les descàrregues passaran per un túnel xifrat automàticament.",
+    feat4_title:"Instal·lació en 1 clic", feat4_desc:"L'assistent de Caliu configura tota la infraestructura Docker automàticament. Sense fitxers de configuració, sense comandes de terminal.",
+    feat5_title:"Dashboard de gestió", feat5_desc:"Atura i arrenca el stack, gestiona la VPN, consulta les URLs de la xarxa i configura l'idioma des d'una interfície unificada.",
+    feat6_title:"3 idiomes inclosos", feat6_desc:"Caliu és disponible en català, castellà i anglès. Canvia d'idioma en qualsevol moment des del panell lateral, sense reiniciar.",
+    how_eyebrow:"Com funciona", how_title:"Llest en 5 minuts",
+    how_desc:"L'instal·lador et guia pas a pas. No cal tenir cap coneixement tècnic — si pots instal·lar un programa normal, pots instal·lar Caliu.",
+    how_btn:"Descarregar ara",
+    step1_title:"Descarrega i executa Caliu", step1_desc:'Un únic fitxer <code style="background:rgba(0,0,0,0.06);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:0.85em;">.exe</code>. Doble clic i l\'assistent s\'obre. Crea drecera a l\'Escriptori i a l\'Inici automàticament.',
+    step2_title:"Instal·la Docker Desktop", step2_desc:"Si no el tens, Caliu t'hi redirigeix directament. Docker és el motor que executa tots els serveis. És gratuït i oficial de Microsoft.",
+    step3_title:"Tria on guardar els fitxers", step3_desc:"Selecciona una carpeta al teu disc dur o disc extern. Necessites almenys 100 GB lliures. Caliu no toca res que ja hi hagi.",
+    step4_title:"Gaudeix del teu Netflix casolà", step4_desc:"Caliu arrenca tot el stack automàticament. Obre Jellyfin, afegeix indexadors a Prowlarr i comença a descarregar.",
+    vpn_eyebrow:"Privacitat recomanada", vpn_title:"Protegeix les teves descàrregues",
+    vpn_desc:"Una VPN amaga les teves descàrregues del teu proveïdor d'internet. Caliu la integra en un sol pas, sense configuració extra.",
+    vpn_badge:"Recomanat per Caliu",
+    vpn_card_desc:"ProtonVPN funciona perfectament amb Gluetun (el motor VPN de Caliu) via WireGuard. Té pla gratuït i plans de pagament des de 4€/mes. Creat per la mateixa empresa que ProtonMail, amb seu a Suïssa i política de zero registres.",
+    vpn_feat1:"Compatible amb Caliu via WireGuard", vpn_feat2:"Pla gratuït disponible (sense targeta)", vpn_feat3:"Política de zero registres auditada", vpn_feat4:"Seu a Suïssa — màxima protecció legal", vpn_feat5:"Des de 4€/mes en el pla anual",
+    vpn_btn:"Obtenir ProtonVPN →", vpn_alt:"Mullvad (alternativa)",
+    vpn_disclaimer:"⚠️ L'ús de Caliu i de les descàrregues és responsabilitat exclusiva de l'usuari. Compleix la legislació vigent al teu país.",
+    faq_eyebrow:"Preguntes freqüents", faq_title:"Tens dubtes?",
+    faq1_q:"Cal tenir coneixements tècnics per instal·lar Caliu?", faq1_a:"No. L'assistent de Caliu guia l'usuari pas a pas. Si pots instal·lar un programa com VLC o Spotify, pots instal·lar Caliu sense cap problema.",
+    faq2_q:"Funciona a Mac o Linux?", faq2_a:"De moment, Caliu (l'aplicació d'escriptori) és exclusiva de Windows 10/11. El propi stack de serveis (Docker) funciona a qualsevol plataforma, però l'instal·lador és per a Windows. Suport Mac/Linux és possible en versions futures.",
+    faq3_q:"L'ordinador ha d'estar sempre engegat?", faq3_a:"Sí. Per accedir als teus continguts des d'altres dispositius, l'ordinador on s'executa Caliu ha d'estar encès. Per a un ús continu, es recomana tenir-lo connectat per cable Ethernet i configurar Windows perquè no es suspengui.",
+    faq4_q:"Quant d'espai ocupen els serveis?", faq4_a:"Les imatges Docker dels 6 serveis ocupen aproximadament 3-4 GB. El contingut multimèdia que descarreguis ocuparà tant espai com vulguis al disc que triïs. Es recomana un disc dur de com a mínim 1 TB per al contingut.",
+    faq5_q:"És gratuït per sempre?", faq5_a:"Sí. Caliu és programari de codi obert sota llicència MIT. No hi ha versions premium, subscripcions ni funcions de pagament. Els serveis que instal·la (Jellyfin, Radarr, Sonarr, etc.) també són gratuïts i de codi obert.",
+    faq6_q:"Puc accedir als meus continguts fora de casa?", faq6_a:"Sí. La forma més senzilla és instal·lar Tailscale (gratuït) al teu ordinador i als dispositius que facis servir. Tailscale crea una xarxa privada virtual entre els teus dispositius sense que hagis d'obrir ports al router.",
+    cta_title:"Comença avui. És gratis.", cta_sub:"Descarrega Caliu i tingues el teu Netflix casolà en 5 minuts.",
+    cta_btn:"Descarregar Caliu per Windows",
+    cta_note:"Windows 10 / 11 &nbsp;·&nbsp; x64 &nbsp;·&nbsp; v1.0.4 &nbsp;·&nbsp; Docker Desktop necessari (gratuït)",
+    footer_tagline:"El teu servidor multimèdia de codi obert. Gratuït per sempre.",
+    footer_col1:"Projecte", footer_releases:"Versions", footer_guide_link:"Guia d'usuari", footer_issues:"Reportar error",
+    footer_col2:"Eines recomanades", footer_col3:"Serveis",
+    footer_disclaimer:"Alguns enllaços poden ser de referit. Caliu no s'associa amb cap dels serveis que menciona.",
+  },
+  es: {
+    nav_features:"Características", nav_how:"Cómo funciona", nav_guide:"Guía", nav_download:"Descargar",
+    hero_badge:"✦ Gratuito &nbsp;·&nbsp; Código abierto &nbsp;·&nbsp; Windows",
+    hero_title:'Tu propio<br/><span class="gradient-text">Netflix casero</span><br/>sin suscripciones',
+    hero_sub:"Un instalador que configura Jellyfin, Radarr, Sonarr, qBittorrent y más en tu ordenador en menos de 5 minutos. Sin comandos, sin complicaciones.",
+    hero_btn_dl:"Descargar Caliu — gratis", hero_btn_gh:"⭐&nbsp; Ver en GitHub",
+    hero_note:"Windows 10 / 11 &nbsp;·&nbsp; x64 &nbsp;·&nbsp; Requiere Docker Desktop (gratuito)",
+    mock_running:"En marcha", mock_stop:"Parar", mock_active:"● activo",
+    mock_nav_home:"INICIO", mock_nav_vpn:"VPN", mock_nav_net:"RED", mock_nav_cfg:"CONFIG",
+    stat1:"Servicios integrados", stat2:"Clic para instalar", stat3:"Coste de licencia", stat4:"Idiomas incluidos",
+    pills_eyebrow:"Todo incluido", pills_title:"Todos los servicios, configurados para ti",
+    pill_jellyfin:"Reproductor", pill_jellyseerr:"Peticiones", pill_radarr:"Películas", pill_sonarr:"Series", pill_prowlarr:"Indexadores", pill_qbit:"Descargas", pill_gluetun:"VPN opcional",
+    feat_eyebrow:"¿Por qué Caliu?", feat_title:"Todo lo que necesitas,<br/>sin la complejidad",
+    feat1_title:"Tu propio Netflix", feat1_desc:"Jellyfin te ofrece una interfaz elegante para ver películas y series desde cualquier dispositivo — TV, móvil, tablet, navegador.",
+    feat2_title:"Acceso desde cualquier lugar", feat2_desc:"Caliu muestra las URLs de todos los servicios en la red local. Para acceso externo sin abrir puertos, se integra fácilmente con Tailscale.",
+    feat3_title:"VPN integrada", feat3_desc:"Activa ProtonVPN o Mullvad desde el dashboard con un formulario sencillo. Las descargas pasarán por un túnel cifrado automáticamente.",
+    feat4_title:"Instalación en 1 clic", feat4_desc:"El asistente de Caliu configura toda la infraestructura Docker automáticamente. Sin archivos de configuración, sin comandos de terminal.",
+    feat5_title:"Panel de gestión", feat5_desc:"Para e inicia el stack, gestiona la VPN, consulta las URLs de la red y configura el idioma desde una interfaz unificada.",
+    feat6_title:"3 idiomas incluidos", feat6_desc:"Caliu está disponible en catalán, castellano e inglés. Cambia de idioma en cualquier momento desde el panel lateral, sin reiniciar.",
+    how_eyebrow:"Cómo funciona", how_title:"Listo en 5 minutos",
+    how_desc:"El instalador te guía paso a paso. No necesitas ningún conocimiento técnico — si puedes instalar un programa normal, puedes instalar Caliu.",
+    how_btn:"Descargar ahora",
+    step1_title:"Descarga y ejecuta Caliu", step1_desc:'Un único archivo <code style="background:rgba(0,0,0,0.06);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:0.85em;">.exe</code>. Doble clic y el asistente se abre. Crea acceso directo en el Escritorio e Inicio automáticamente.',
+    step2_title:"Instala Docker Desktop", step2_desc:"Si no lo tienes, Caliu te redirige directamente. Docker es el motor que ejecuta todos los servicios. Es gratuito y oficial de Microsoft.",
+    step3_title:"Elige dónde guardar los archivos", step3_desc:"Selecciona una carpeta en tu disco duro o disco externo. Necesitas al menos 100 GB libres. Caliu no toca nada que ya exista.",
+    step4_title:"Disfruta de tu Netflix casero", step4_desc:"Caliu arranca todo el stack automáticamente. Abre Jellyfin, añade indexadores en Prowlarr y empieza a descargar.",
+    vpn_eyebrow:"Privacidad recomendada", vpn_title:"Protege tus descargas",
+    vpn_desc:"Una VPN oculta tus descargas a tu proveedor de internet. Caliu la integra en un solo paso, sin configuración extra.",
+    vpn_badge:"Recomendado por Caliu",
+    vpn_card_desc:"ProtonVPN funciona perfectamente con Gluetun (el motor VPN de Caliu) via WireGuard. Tiene plan gratuito y planes de pago desde 4€/mes. Creado por la misma empresa que ProtonMail, con sede en Suiza y política de cero registros.",
+    vpn_feat1:"Compatible con Caliu via WireGuard", vpn_feat2:"Plan gratuito disponible (sin tarjeta)", vpn_feat3:"Política de cero registros auditada", vpn_feat4:"Sede en Suiza — máxima protección legal", vpn_feat5:"Desde 4€/mes en el plan anual",
+    vpn_btn:"Obtener ProtonVPN →", vpn_alt:"Mullvad (alternativa)",
+    vpn_disclaimer:"⚠️ El uso de Caliu y de las descargas es responsabilidad exclusiva del usuario. Cumple la legislación vigente en tu país.",
+    faq_eyebrow:"Preguntas frecuentes", faq_title:"¿Tienes dudas?",
+    faq1_q:"¿Se necesitan conocimientos técnicos para instalar Caliu?", faq1_a:"No. El asistente de Caliu guía al usuario paso a paso. Si puedes instalar un programa como VLC o Spotify, puedes instalar Caliu sin ningún problema.",
+    faq2_q:"¿Funciona en Mac o Linux?", faq2_a:"Por ahora, Caliu (la aplicación de escritorio) es exclusiva de Windows 10/11. El propio stack de servicios (Docker) funciona en cualquier plataforma, pero el instalador es para Windows. Soporte Mac/Linux es posible en versiones futuras.",
+    faq3_q:"¿El ordenador tiene que estar siempre encendido?", faq3_a:"Sí. Para acceder a tus contenidos desde otros dispositivos, el ordenador donde se ejecuta Caliu debe estar encendido. Para un uso continuo, se recomienda tenerlo conectado por cable Ethernet y configurar Windows para que no se suspenda.",
+    faq4_q:"¿Cuánto espacio ocupan los servicios?", faq4_a:"Las imágenes Docker de los 6 servicios ocupan aproximadamente 3-4 GB. El contenido multimedia que descargues ocupará tanto espacio como quieras en el disco que elijas. Se recomienda un disco duro de al menos 1 TB para el contenido.",
+    faq5_q:"¿Es gratuito para siempre?", faq5_a:"Sí. Caliu es software de código abierto bajo licencia MIT. No hay versiones premium, suscripciones ni funciones de pago. Los servicios que instala (Jellyfin, Radarr, Sonarr, etc.) también son gratuitos y de código abierto.",
+    faq6_q:"¿Puedo acceder a mis contenidos desde fuera de casa?", faq6_a:"Sí. La forma más sencilla es instalar Tailscale (gratuito) en tu ordenador y en los dispositivos que uses. Tailscale crea una red privada virtual entre tus dispositivos sin que tengas que abrir puertos en el router.",
+    cta_title:"Empieza hoy. Es gratis.", cta_sub:"Descarga Caliu y ten tu Netflix casero en 5 minutos.",
+    cta_btn:"Descargar Caliu para Windows",
+    cta_note:"Windows 10 / 11 &nbsp;·&nbsp; x64 &nbsp;·&nbsp; v1.0.4 &nbsp;·&nbsp; Docker Desktop necesario (gratuito)",
+    footer_tagline:"Tu servidor multimedia de código abierto. Gratis para siempre.",
+    footer_col1:"Proyecto", footer_releases:"Versiones", footer_guide_link:"Guía de usuario", footer_issues:"Reportar error",
+    footer_col2:"Herramientas recomendadas", footer_col3:"Servicios",
+    footer_disclaimer:"Algunos enlaces pueden ser de referido. Caliu no se asocia con ninguno de los servicios que menciona.",
+  },
+  en: {
+    nav_features:"Features", nav_how:"How it works", nav_guide:"Guide", nav_download:"Download",
+    hero_badge:"✦ Free &nbsp;·&nbsp; Open source &nbsp;·&nbsp; Windows",
+    hero_title:'Your own<br/><span class="gradient-text">home Netflix</span><br/>without subscriptions',
+    hero_sub:"An installer that sets up Jellyfin, Radarr, Sonarr, qBittorrent and more on your computer in under 5 minutes. No commands, no complications.",
+    hero_btn_dl:"Download Caliu — free", hero_btn_gh:"⭐&nbsp; View on GitHub",
+    hero_note:"Windows 10 / 11 &nbsp;·&nbsp; x64 &nbsp;·&nbsp; Requires Docker Desktop (free)",
+    mock_running:"Running", mock_stop:"Stop", mock_active:"● active",
+    mock_nav_home:"HOME", mock_nav_vpn:"VPN", mock_nav_net:"NETWORK", mock_nav_cfg:"CONFIG",
+    stat1:"Integrated services", stat2:"Click to install", stat3:"License cost", stat4:"Languages included",
+    pills_eyebrow:"All included", pills_title:"All services, configured for you",
+    pill_jellyfin:"Player", pill_jellyseerr:"Requests", pill_radarr:"Movies", pill_sonarr:"TV Shows", pill_prowlarr:"Indexers", pill_qbit:"Downloads", pill_gluetun:"Optional VPN",
+    feat_eyebrow:"Why Caliu?", feat_title:"Everything you need,<br/>without the complexity",
+    feat1_title:"Your own Netflix", feat1_desc:"Jellyfin gives you an elegant interface to watch movies and shows from any device — TV, phone, tablet, browser.",
+    feat2_title:"Access from anywhere", feat2_desc:"Caliu shows the URLs of all services on your local network. For external access without port forwarding, it integrates easily with Tailscale.",
+    feat3_title:"Built-in VPN", feat3_desc:"Enable ProtonVPN or Mullvad from the dashboard with a simple form. Downloads will automatically route through an encrypted tunnel.",
+    feat4_title:"1-click installation", feat4_desc:"Caliu's wizard configures all the Docker infrastructure automatically. No config files, no terminal commands.",
+    feat5_title:"Management dashboard", feat5_desc:"Stop and start the stack, manage the VPN, check network URLs and configure language from a unified interface.",
+    feat6_title:"3 languages included", feat6_desc:"Caliu is available in Catalan, Spanish and English. Switch language at any time from the side panel, without restarting.",
+    how_eyebrow:"How it works", how_title:"Ready in 5 minutes",
+    how_desc:"The installer guides you step by step. No technical knowledge required — if you can install a regular program, you can install Caliu.",
+    how_btn:"Download now",
+    step1_title:"Download and run Caliu", step1_desc:'A single <code style="background:rgba(0,0,0,0.06);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:0.85em;">.exe</code> file. Double-click and the wizard opens. Creates shortcuts on the Desktop and Start Menu automatically.',
+    step2_title:"Install Docker Desktop", step2_desc:"If you don't have it, Caliu redirects you directly. Docker is the engine that runs all the services. It's free and official from Microsoft.",
+    step3_title:"Choose where to save files", step3_desc:"Select a folder on your hard drive or external disk. You need at least 100 GB free. Caliu won't touch anything already there.",
+    step4_title:"Enjoy your home Netflix", step4_desc:"Caliu starts the whole stack automatically. Open Jellyfin, add indexers to Prowlarr and start downloading.",
+    vpn_eyebrow:"Recommended privacy", vpn_title:"Protect your downloads",
+    vpn_desc:"A VPN hides your downloads from your internet provider. Caliu integrates it in one step, with no extra configuration.",
+    vpn_badge:"Recommended by Caliu",
+    vpn_card_desc:"ProtonVPN works perfectly with Gluetun (Caliu's VPN engine) via WireGuard. It has a free plan and paid plans from €4/month. Created by the same company as ProtonMail, based in Switzerland with a zero-logs policy.",
+    vpn_feat1:"Compatible with Caliu via WireGuard", vpn_feat2:"Free plan available (no card needed)", vpn_feat3:"Audited zero-logs policy", vpn_feat4:"Based in Switzerland — maximum legal protection", vpn_feat5:"From €4/month on the annual plan",
+    vpn_btn:"Get ProtonVPN →", vpn_alt:"Mullvad (alternative)",
+    vpn_disclaimer:"⚠️ The use of Caliu and downloads is the user's sole responsibility. Comply with the laws applicable in your country.",
+    faq_eyebrow:"Frequently asked questions", faq_title:"Got questions?",
+    faq1_q:"Do I need technical knowledge to install Caliu?", faq1_a:"No. Caliu's wizard guides the user step by step. If you can install a program like VLC or Spotify, you can install Caliu without any problem.",
+    faq2_q:"Does it work on Mac or Linux?", faq2_a:"For now, Caliu (the desktop app) is exclusive to Windows 10/11. The service stack itself (Docker) works on any platform, but the installer is for Windows. Mac/Linux support may come in future versions.",
+    faq3_q:"Does the computer need to stay on all the time?", faq3_a:"Yes. To access your content from other devices, the computer running Caliu must be on. For continuous use, it's recommended to connect it via Ethernet and configure Windows to prevent sleep.",
+    faq4_q:"How much space do the services take up?", faq4_a:"The Docker images for the 6 services take up approximately 3-4 GB. The media content you download will take as much space as you want on the disk you choose. A hard drive of at least 1 TB is recommended for content.",
+    faq5_q:"Is it free forever?", faq5_a:"Yes. Caliu is open-source software under the MIT license. There are no premium versions, subscriptions or paid features. The services it installs (Jellyfin, Radarr, Sonarr, etc.) are also free and open source.",
+    faq6_q:"Can I access my content from outside home?", faq6_a:"Yes. The easiest way is to install Tailscale (free) on your computer and the devices you use. Tailscale creates a private virtual network between your devices without you having to open ports on your router.",
+    cta_title:"Start today. It's free.", cta_sub:"Download Caliu and have your home Netflix in 5 minutes.",
+    cta_btn:"Download Caliu for Windows",
+    cta_note:"Windows 10 / 11 &nbsp;·&nbsp; x64 &nbsp;·&nbsp; v1.0.4 &nbsp;·&nbsp; Docker Desktop required (free)",
+    footer_tagline:"Your open-source media server. Free forever.",
+    footer_col1:"Project", footer_releases:"Releases", footer_guide_link:"User guide", footer_issues:"Report issue",
+    footer_col2:"Recommended tools", footer_col3:"Services",
+    footer_disclaimer:"Some links may be referral links. Caliu is not affiliated with any of the services it mentions.",
+  }
+};
+
+/* ── Apply language ───────────────────────────────────────────────────────── */
+function applyLang(lang) {
+  if (!i18n[lang]) return;
+  localStorage.setItem('caliu-lang', lang);
+  document.documentElement.lang = lang;
+  const t = i18n[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = t[el.dataset.i18n];
+    if (v !== undefined) el.innerHTML = v;
+  });
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+}
+
+function setLang(lang) { applyLang(lang); }
+
+/* ── Auto-detect ──────────────────────────────────────────────────────────── */
+async function initLang() {
+  // 1. Saved preference
+  const saved = localStorage.getItem('caliu-lang');
+  if (saved && i18n[saved]) { applyLang(saved); return; }
+
+  // 2. Browser language
+  const langs = Array.from(navigator.languages || [navigator.language || 'en']);
+  for (const l of langs) {
+    const c = l.toLowerCase().split('-')[0];
+    if (c === 'ca') { applyLang('ca'); return; }
+    if (c === 'es') { applyLang('es'); return; }
+    if (c === 'en') { applyLang('en'); return; }
+  }
+
+  // 3. IP geolocation fallback (only if browser lang gave no clear signal)
+  try {
+    const r = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3000) });
+    const d = await r.json();
+    if (d.country_code === 'ES') { applyLang('es'); return; }
+  } catch (_) {}
+
+  applyLang('en');
+}
+
+initLang();
+
+/* ── FAQ accordion ───────────────────────────────────────────────────────── */
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+/* ── Scroll fade-in ──────────────────────────────────────────────────────── */
+const observer = new IntersectionObserver(
+  entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+  { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+);
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
