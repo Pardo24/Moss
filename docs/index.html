@@ -12,6 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
     /* ─── Tokens ──────────────────────────────────────────────────────── */
     :root {
@@ -98,7 +99,8 @@
     nav a { font-size: 0.88rem; font-weight: 500; color: var(--text-2); transition: color 0.15s; }
     nav a:hover { color: var(--text); }
     .nav-sep { width: 1px; height: 18px; background: var(--border); flex-shrink: 0; }
-    .nav-cta { display: flex; align-items: center; gap: 12px; }
+    .nav-cta { display: flex; align-items: center; gap: 24px; }
+    .fa-icon { font-size: 0.95em; }
 
     /* ─── Buy Me a Coffee ────────────────────────────────────────────── */
     .btn-bmc { display: inline-flex; align-items: center; gap: 7px; background: #FFDD00; color: #000; font-weight: 700; font-size: 0.9rem; padding: 10px 22px; border-radius: 10px; text-decoration: none; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 2px 12px rgba(255,221,0,0.3); }
@@ -283,7 +285,7 @@
     </nav>
 
     <div class="nav-cta">
-      <a href="https://buymeacoffee.com/danipardo24" target="_blank" rel="noopener" class="nav-bmc hide-sm">☕ <span data-i18n="nav_bmc">Suport</span></a>
+      <a href="https://buymeacoffee.com/danipardo24" target="_blank" rel="noopener" class="nav-bmc hide-sm"><i class="fa-solid fa-mug-hot fa-icon"></i> <span data-i18n="nav_bmc">Suport</span></a>
       <a href="#download" class="btn btn-primary" style="padding:9px 20px;font-size:0.85rem;" data-i18n="nav_download">
         Descarregar
       </a>
@@ -309,7 +311,7 @@
       en el teu ordinador en menys de 5 minuts. Sense comandos, sense complicacions.
     </p>
 
-    <div class="free-badge" data-i18n="hero_free">✓ 100% gratuït · per sempre</div>
+    <div class="free-badge"><i class="fa-solid fa-check"></i> <span data-i18n="hero_free">100% gratuït · per sempre</span></div>
     <div class="hero-buttons">
       <a href="#download" class="btn btn-primary" style="font-size:1rem;padding:15px 36px;" data-i18n="hero_btn_dl">
         Descarregar Caliu
@@ -563,17 +565,17 @@
     <h2 data-i18n="cta_title">Comença avui. És gratis.</h2>
     <p data-i18n="cta_sub">Descarrega Caliu i tingues el teu Netflix casolà en 5 minuts.</p>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-      <a href="https://github.com/Pardo24/caliu/releases/latest" class="btn btn-primary" data-i18n="cta_btn_win">
-        🪟 Descarregar per Windows
+      <a href="https://github.com/Pardo24/caliu/releases/latest" class="btn btn-primary">
+        <i class="fa-brands fa-windows" style="margin-right:7px;"></i><span data-i18n="cta_btn_win">Descarregar per Windows</span>
       </a>
-      <a href="https://github.com/Pardo24/caliu/releases/latest" class="btn" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);color:#fff;" data-i18n="cta_btn_mac">
-        🍎 Descarregar per Mac
+      <a href="https://github.com/Pardo24/caliu/releases/latest" class="btn" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);color:#fff;">
+        <i class="fa-brands fa-apple" style="margin-right:7px;"></i><span data-i18n="cta_btn_mac">Descarregar per Mac</span>
       </a>
     </div>
     <p class="cta-note" data-i18n="cta_note">Windows 10 / 11 &nbsp;·&nbsp; macOS 12+ &nbsp;·&nbsp; x64 &nbsp;·&nbsp; v1.0.6 &nbsp;·&nbsp; Docker Desktop necessari (gratuït)</p>
     <div style="margin-top:28px;">
       <a href="https://buymeacoffee.com/danipardo24" target="_blank" rel="noopener" class="btn-bmc">
-        ☕ <span data-i18n="bmc_btn">Invita'm a un cafè</span>
+        <i class="fa-solid fa-mug-hot" style="margin-right:6px;"></i><span data-i18n="bmc_btn">Invita'm a un cafè</span>
       </a>
       <p style="font-size:0.78rem;color:var(--text-2);margin-top:10px;" data-i18n="bmc_sub">Si Caliu t'ha estat útil, pots donar suport al projecte amb un cafè.</p>
     </div>
@@ -629,7 +631,7 @@ const i18n = {
     hero_badge:"✦ Gratuït &nbsp;·&nbsp; Codi obert &nbsp;·&nbsp; Windows &amp; Mac",
     hero_title:'El teu<br/><span class="gradient-text">Netflix casolà</span><br/>sense subscripcions',
     hero_sub:"Un clic. Cinc minuts. El teu propi Netflix a casa, per sempre i sense pagar subscripcions.",
-    hero_free:"✓ 100% gratuït · per sempre",
+    hero_free:"100% gratuït · per sempre",
     hero_btn_dl:"Descarregar Caliu", hero_btn_gh:"Veure a GitHub",
     hero_note:"Windows 10 / 11 &nbsp;·&nbsp; macOS 12+ &nbsp;·&nbsp; x64 &nbsp;·&nbsp; Requereix Docker Desktop (gratuït)",
     mock_running:"En marxa", mock_stop:"Parar", mock_active:"● actiu",
@@ -666,7 +668,7 @@ const i18n = {
     faq5_q:"És gratuït per sempre?", faq5_a:"Sí. Caliu és programari de codi obert sota llicència MIT. No hi ha versions premium, subscripcions ni funcions de pagament. Els serveis que instal·la (Jellyfin, Radarr, Sonarr, etc.) també són gratuïts i de codi obert.",
     faq6_q:"Puc accedir als meus continguts fora de casa?", faq6_a:"Sí. La forma més senzilla és instal·lar Tailscale (gratuït) al teu ordinador i als dispositius que facis servir. Tailscale crea una xarxa privada virtual entre els teus dispositius sense que hagis d'obrir ports al router.",
     cta_title:"Comença avui. És gratis.", cta_sub:"Descarrega Caliu i tingues el teu Netflix casolà en 5 minuts.",
-    cta_btn_win:"🪟 Descarregar per Windows", cta_btn_mac:"🍎 Descarregar per Mac",
+    cta_btn_win:"Descarregar per Windows", cta_btn_mac:"Descarregar per Mac",
     cta_note:"Windows 10 / 11 &nbsp;·&nbsp; macOS 12+ &nbsp;·&nbsp; x64 &nbsp;·&nbsp; v1.0.6 &nbsp;·&nbsp; Docker Desktop necessari (gratuït)",
     footer_tagline:"El teu servidor multimèdia de codi obert. Gratuït per sempre.",
     footer_col1:"Projecte", footer_releases:"Versions", footer_guide_link:"Guia d'usuari", footer_issues:"Reportar error",
@@ -681,7 +683,7 @@ const i18n = {
     hero_badge:"✦ Gratuito &nbsp;·&nbsp; Código abierto &nbsp;·&nbsp; Windows &amp; Mac",
     hero_title:'Tu propio<br/><span class="gradient-text">Netflix casero</span><br/>sin suscripciones',
     hero_sub:"Un clic. Cinco minutos. Tu propio Netflix en casa, para siempre y sin pagar suscripciones.",
-    hero_free:"✓ 100% gratuito · para siempre",
+    hero_free:"100% gratuito · para siempre",
     hero_btn_dl:"Descargar Caliu", hero_btn_gh:"Ver en GitHub",
     hero_note:"Windows 10 / 11 &nbsp;·&nbsp; macOS 12+ &nbsp;·&nbsp; x64 &nbsp;·&nbsp; Requiere Docker Desktop (gratuito)",
     mock_running:"En marcha", mock_stop:"Parar", mock_active:"● activo",
@@ -718,7 +720,7 @@ const i18n = {
     faq5_q:"¿Es gratuito para siempre?", faq5_a:"Sí. Caliu es software de código abierto bajo licencia MIT. No hay versiones premium, suscripciones ni funciones de pago. Los servicios que instala (Jellyfin, Radarr, Sonarr, etc.) también son gratuitos y de código abierto.",
     faq6_q:"¿Puedo acceder a mis contenidos desde fuera de casa?", faq6_a:"Sí. La forma más sencilla es instalar Tailscale (gratuito) en tu ordenador y en los dispositivos que uses. Tailscale crea una red privada virtual entre tus dispositivos sin que tengas que abrir puertos en el router.",
     cta_title:"Empieza hoy. Es gratis.", cta_sub:"Descarga Caliu y ten tu Netflix casero en 5 minutos.",
-    cta_btn_win:"🪟 Descargar para Windows", cta_btn_mac:"🍎 Descargar para Mac",
+    cta_btn_win:"Descargar para Windows", cta_btn_mac:"Descargar para Mac",
     cta_note:"Windows 10 / 11 &nbsp;·&nbsp; macOS 12+ &nbsp;·&nbsp; x64 &nbsp;·&nbsp; v1.0.6 &nbsp;·&nbsp; Docker Desktop necesario (gratuito)",
     footer_tagline:"Tu servidor multimedia de código abierto. Gratis para siempre.",
     footer_col1:"Proyecto", footer_releases:"Versiones", footer_guide_link:"Guía de usuario", footer_issues:"Reportar error",
@@ -733,7 +735,7 @@ const i18n = {
     hero_badge:"✦ Free &nbsp;·&nbsp; Open source &nbsp;·&nbsp; Windows &amp; Mac",
     hero_title:'Your own<br/><span class="gradient-text">home Netflix</span><br/>without subscriptions',
     hero_sub:"One click. Five minutes. Your own Netflix at home, forever and without paying subscriptions.",
-    hero_free:"✓ 100% free · forever",
+    hero_free:"100% free · forever",
     hero_btn_dl:"Download Caliu", hero_btn_gh:"View on GitHub",
     hero_note:"Windows 10 / 11 &nbsp;·&nbsp; macOS 12+ &nbsp;·&nbsp; x64 &nbsp;·&nbsp; Requires Docker Desktop (free)",
     mock_running:"Running", mock_stop:"Stop", mock_active:"● active",
@@ -770,7 +772,7 @@ const i18n = {
     faq5_q:"Is it free forever?", faq5_a:"Yes. Caliu is open-source software under the MIT license. There are no premium versions, subscriptions or paid features. The services it installs (Jellyfin, Radarr, Sonarr, etc.) are also free and open source.",
     faq6_q:"Can I access my content from outside home?", faq6_a:"Yes. The easiest way is to install Tailscale (free) on your computer and the devices you use. Tailscale creates a private virtual network between your devices without you having to open ports on your router.",
     cta_title:"Start today. It's free.", cta_sub:"Download Caliu and have your home Netflix in 5 minutes.",
-    cta_btn_win:"🪟 Download for Windows", cta_btn_mac:"🍎 Download for Mac",
+    cta_btn_win:"Download for Windows", cta_btn_mac:"Download for Mac",
     cta_note:"Windows 10 / 11 &nbsp;·&nbsp; macOS 12+ &nbsp;·&nbsp; x64 &nbsp;·&nbsp; v1.0.6 &nbsp;·&nbsp; Docker Desktop required (free)",
     footer_tagline:"Your open-source media server. Free forever.",
     footer_col1:"Project", footer_releases:"Releases", footer_guide_link:"User guide", footer_issues:"Report issue",
