@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
+import { RefreshCw, FolderOpen } from 'lucide-react';
 import { useT } from '../LangContext';
+import ServiceIcon, { type ServiceName } from '../components/ServiceIcon';
 
-const SERVICES = [
-  { name: 'Jellyfin',    icon: '🎬', port: 8096, sub: (t: { done_cinema: string }) => t.done_cinema },
-  { name: 'Jellyseerr',  icon: '🔍', port: 5055, sub: (t: { done_request: string }) => t.done_request },
-  { name: 'Radarr',      icon: '🎥', port: 7878, sub: (t: { done_movies: string }) => t.done_movies },
-  { name: 'Sonarr',      icon: '📺', port: 8989, sub: (t: { done_series: string }) => t.done_series },
-  { name: 'Prowlarr',    icon: '🔌', port: 9696, sub: () => 'Indexers' },
-  { name: 'qBittorrent', icon: '⬇️', port: 8090, sub: () => 'Downloads' },
+const SERVICES: { name: ServiceName; port: number; sub: (t: Record<string, string>) => string }[] = [
+  { name: 'Jellyfin',    port: 8096, sub: t => t.done_cinema },
+  { name: 'Jellyseerr',  port: 5055, sub: t => t.done_request },
+  { name: 'Radarr',      port: 7878, sub: t => t.done_movies },
+  { name: 'Sonarr',      port: 8989, sub: t => t.done_series },
+  { name: 'Prowlarr',    port: 9696, sub: () => 'Indexers' },
+  { name: 'qBittorrent', port: 8090, sub: () => 'Downloads' },
 ];
 
 type Status = 'checking' | 'running' | 'stopped';
@@ -67,7 +69,9 @@ export default function PageHome({ config }: { config: Record<string, string> })
               {action === 'stopping' ? t.home_stopping : t.home_stop}
             </button>
           )}
-          <button onClick={checkStatus} className="btn-ghost" style={{ padding: '7px 10px' }} title="Refresh">↻</button>
+          <button onClick={checkStatus} className="btn-ghost" style={{ padding: '7px 10px' }} title="Refresh">
+            <RefreshCw size={14} strokeWidth={2} />
+          </button>
         </div>
       </div>
 
@@ -80,7 +84,7 @@ export default function PageHome({ config }: { config: Record<string, string> })
             disabled={status !== 'running'}
             className="card-sm flex flex-col items-center gap-1.5 p-3 transition-all hover:shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <span className="text-xl">{s.icon}</span>
+            <ServiceIcon name={s.name} size={28} />
             <span className="font-semibold text-xs">{s.name}</span>
             <span className="text-xs" style={{ color: 'var(--text-3)' }}>{s.sub(t as never)}</span>
           </button>
@@ -88,7 +92,10 @@ export default function PageHome({ config }: { config: Record<string, string> })
       </div>
 
       {config.DATA_PATH && (
-        <p className="text-xs truncate" style={{ color: 'var(--text-3)' }}>📁 {config.DATA_PATH}</p>
+        <p className="text-xs truncate flex items-center gap-1.5" style={{ color: 'var(--text-3)' }}>
+          <FolderOpen size={13} strokeWidth={1.75} />
+          {config.DATA_PATH}
+        </p>
       )}
     </div>
   );

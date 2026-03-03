@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { Home, Lock, Globe, Settings } from 'lucide-react';
 import { useT } from './LangContext';
 import type { Lang } from './i18n';
+import appIcon from '../assets/icons/icons/png/64x64.png';
 import PageHome from './pages/PageHome';
 import PageVpn from './pages/PageVpn';
 import PageNetwork from './pages/PageNetwork';
@@ -24,11 +26,11 @@ export default function Dashboard({ initialConfig, onReinstall }: Props) {
   const [page, setPage] = useState<Page>('home');
   const [config, setConfig] = useState(initialConfig);
 
-  const navItems: { id: Page; icon: string; label: string }[] = [
-    { id: 'home',     icon: '🏠', label: t.nav_home },
-    { id: 'vpn',      icon: '🔒', label: t.nav_vpn },
-    { id: 'network',  icon: '🌐', label: t.nav_network },
-    { id: 'settings', icon: '⚙️', label: t.nav_settings },
+  const navItems: { id: Page; icon: React.ReactNode; label: string }[] = [
+    { id: 'home',     icon: <Home     size={18} strokeWidth={1.75} />, label: t.nav_home },
+    { id: 'vpn',      icon: <Lock     size={18} strokeWidth={1.75} />, label: t.nav_vpn },
+    { id: 'network',  icon: <Globe    size={18} strokeWidth={1.75} />, label: t.nav_network },
+    { id: 'settings', icon: <Settings size={18} strokeWidth={1.75} />, label: t.nav_settings },
   ];
 
   const refreshConfig = async () => {
@@ -42,8 +44,8 @@ export default function Dashboard({ initialConfig, onReinstall }: Props) {
       <div className="sidebar w-20 flex flex-col items-center py-4 gap-0.5 shrink-0">
         {/* Logo mark */}
         <div className="mb-4 mt-1">
-          <div className="logo-circle" style={{ width: 40, height: 40, borderRadius: 12, fontSize: '1.25rem', boxShadow: '0 4px 12px rgba(249,115,22,0.3)' }}>
-            🔥
+          <div className="logo-circle" style={{ width: 40, height: 40, borderRadius: 12, padding: 4, boxShadow: '0 4px 12px rgba(249,115,22,0.3)' }}>
+            <img src={appIcon} alt="Caliu" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 8 }} />
           </div>
         </div>
 

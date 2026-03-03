@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { Sparkles, Lock, ChevronUp, ChevronDown } from 'lucide-react';
 import type { Config } from '../App';
 import { useT } from '../LangContext';
+import ServiceIcon from '../components/ServiceIcon';
 
 type Props = { config: Config; updateConfig: (p: Partial<Config>) => void; next: () => void };
 type VpnState = 'idle' | 'loading' | 'ok' | 'error';
@@ -27,25 +29,25 @@ export default function StepDone({ config, next }: Props) {
   return (
     <div className="h-full flex flex-col items-center justify-center gap-5 px-8 text-center overflow-y-auto py-6">
       <div className="flex flex-col items-center gap-3">
-        <div className="text-6xl">🎉</div>
+        <Sparkles size={48} strokeWidth={1.5} style={{ color: 'var(--accent)' }} />
         <h2 className="text-3xl font-bold gradient-title">{t.done_title}</h2>
         <p className="text-sm max-w-md" style={{ color: 'var(--text-2)' }}>{t.done_desc}</p>
       </div>
 
       {/* Service buttons */}
       <div className="grid grid-cols-2 gap-2.5 w-full max-w-md">
-        {[
-          { url: 'http://localhost:8096', icon: '🎬', name: 'Jellyfin',   sub: t.done_cinema },
-          { url: 'http://localhost:5055', icon: '🔍', name: 'Jellyseerr', sub: t.done_request },
-          { url: 'http://localhost:7878', icon: '🎥', name: 'Radarr',     sub: t.done_movies },
-          { url: 'http://localhost:8989', icon: '📺', name: 'Sonarr',     sub: t.done_series },
-        ].map(s => (
+        {([
+          { url: 'http://localhost:8096', name: 'Jellyfin',   sub: t.done_cinema  },
+          { url: 'http://localhost:5055', name: 'Jellyseerr', sub: t.done_request },
+          { url: 'http://localhost:7878', name: 'Radarr',     sub: t.done_movies  },
+          { url: 'http://localhost:8989', name: 'Sonarr',     sub: t.done_series  },
+        ] as const).map(s => (
           <button
             key={s.name}
             onClick={() => open(s.url)}
             className="card-sm flex flex-col items-center gap-2 px-4 py-4 transition-all hover:shadow-md"
           >
-            <span className="text-2xl">{s.icon}</span>
+            <ServiceIcon name={s.name} size={32} />
             <span className="font-semibold text-sm">{s.name}</span>
             <span className="text-xs" style={{ color: 'var(--text-3)' }}>{s.sub}</span>
           </button>
@@ -55,7 +57,7 @@ export default function StepDone({ config, next }: Props) {
       {/* Indexer block */}
       <div className="card w-full max-w-md p-4 text-left space-y-3">
         <div className="flex items-center gap-2">
-          <span className="text-xl">🔌</span>
+          <ServiceIcon name="Prowlarr" size={20} />
           <span className="font-semibold text-sm">{t.done_indexer_title}</span>
         </div>
         <p className="text-xs leading-relaxed" style={{ color: 'var(--text-2)' }}>
@@ -78,10 +80,10 @@ export default function StepDone({ config, next }: Props) {
             className="w-full flex items-center justify-between"
           >
             <div className="flex items-center gap-2">
-              <span className="text-xl">🔒</span>
+              <Lock size={18} strokeWidth={1.75} style={{ color: 'var(--accent)' }} />
               <span className="font-semibold text-sm">{t.done_vpn_title}</span>
             </div>
-            <span className="text-xs" style={{ color: 'var(--text-3)' }}>{showVpn ? '▲' : '▼'}</span>
+            {showVpn ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
 
           {showVpn && (
