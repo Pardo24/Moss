@@ -30,7 +30,8 @@ jobs:
         with:
           files: |
             out/make/**/*.exe
-            out/make/**/*.msi
+            out/make/**/*.nupkg
+            out/make/**/RELEASES
 
   build-mac:
     runs-on: macos-latest

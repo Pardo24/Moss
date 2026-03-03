@@ -5,8 +5,11 @@ import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
 import fs from 'node:fs/promises';
 import started from 'electron-squirrel-startup';
+import { updateElectronApp } from 'update-electron-app';
 
 if (started) app.quit();
+
+if (app.isPackaged) updateElectronApp();
 
 Menu.setApplicationMenu(null);
 
