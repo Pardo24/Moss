@@ -343,27 +343,46 @@
         <div class="mockup-body">
           <div class="m-sidebar">
             <div class="m-logo">🌿</div>
-            <div class="m-nav active"><span>🏠</span><span data-i18n="mock_nav_home">INICI</span></div>
-            <div class="m-nav"><span>🔒</span><span data-i18n="mock_nav_vpn">VPN</span></div>
-            <div class="m-nav"><span>🌐</span><span data-i18n="mock_nav_net">XARXA</span></div>
-            <div class="m-nav"><span>⚙️</span><span data-i18n="mock_nav_cfg">CONFIG</span></div>
+            <div class="m-nav active"><span>⌂</span><span data-i18n="mock_nav_home">INICI</span></div>
+            <div class="m-nav"><span>◉</span><span data-i18n="mock_nav_vpn">VPN</span></div>
+            <div class="m-nav"><span>⊕</span><span data-i18n="mock_nav_net">XARXA</span></div>
+            <div class="m-nav"><span>⚙</span><span data-i18n="mock_nav_cfg">CFG</span></div>
             <div class="m-lang"><span class="al">CA</span><span>ES</span><span>EN</span></div>
           </div>
           <div class="m-content">
-            <div class="m-status">
-              <div class="m-badge" data-i18n="mock_running">En marxa</div>
-              <div style="display:flex;gap:4px;">
+            <!-- Status bar — new Docker Desktop style -->
+            <div class="m-status" style="border-left:2.5px solid #22c55e;padding:8px 12px;gap:8px;display:flex;align-items:center;">
+              <div style="width:26px;height:26px;border-radius:7px;background:rgba(34,197,94,0.1);display:flex;align-items:center;justify-content:center;color:#22c55e;font-size:0.7rem;flex-shrink:0;">⚡</div>
+              <div style="flex:1;">
+                <div style="font-size:0.62rem;font-weight:700;color:#111;line-height:1.2;">Moss</div>
+                <div style="font-size:0.53rem;color:#22c55e;font-weight:600;" data-i18n="mock_running">En marxa</div>
+              </div>
+              <div style="display:flex;gap:4px;align-items:center;">
                 <div class="m-stopbtn" data-i18n="mock_stop">Parar</div>
                 <div class="m-refresh">↻</div>
               </div>
             </div>
-            <div class="m-grid">
-              <div class="m-card"><span style="font-size:1.1rem">🎬</span>Jellyfin<span style="color:#22c55e;font-size:0.5rem" data-i18n="mock_active">● actiu</span></div>
-              <div class="m-card"><span style="font-size:1.1rem">🔍</span>Jellyseerr<span style="color:#22c55e;font-size:0.5rem" data-i18n="mock_active">● actiu</span></div>
-              <div class="m-card"><span style="font-size:1.1rem">🎥</span>Radarr<span style="color:#22c55e;font-size:0.5rem" data-i18n="mock_active">● actiu</span></div>
-              <div class="m-card"><span style="font-size:1.1rem">📺</span>Sonarr<span style="color:#22c55e;font-size:0.5rem" data-i18n="mock_active">● actiu</span></div>
-              <div class="m-card"><span style="font-size:1.1rem">🔌</span>Prowlarr<span style="color:#22c55e;font-size:0.5rem" data-i18n="mock_active">● actiu</span></div>
-              <div class="m-card"><span style="font-size:1.1rem">⬇️</span>qBit<span style="color:#22c55e;font-size:0.5rem" data-i18n="mock_active">● actiu</span></div>
+            <!-- Primary 2-col service cards -->
+            <div class="m-grid" style="grid-template-columns:1fr 1fr;">
+              <div class="m-card" style="padding:12px 8px 8px;gap:5px;"><span style="font-size:1.2rem">🎬</span><div style="font-size:0.62rem;font-weight:700;">Jellyfin</div><div style="font-size:0.5rem;color:#94a3b8;" data-i18n="mock_cinema">Cinema</div></div>
+              <div class="m-card" style="padding:12px 8px 8px;gap:5px;"><span style="font-size:1.2rem">🔍</span><div style="font-size:0.62rem;font-weight:700;">Jellyseerr</div><div style="font-size:0.5rem;color:#94a3b8;" data-i18n="mock_request">Sol·licituds</div></div>
+            </div>
+            <!-- Downloads + VPN row -->
+            <div style="display:flex;gap:7px;">
+              <div class="m-card" style="flex:2;flex-direction:row;justify-content:space-between;padding:6px 10px;">
+                <span style="font-size:0.58rem;font-weight:700;color:#64748b;" data-i18n="mock_downloads">Descàrregues</span>
+                <div style="display:flex;align-items:center;gap:3px;"><span style="font-size:0.8rem;">⬇️</span><span style="font-size:0.55rem;font-weight:700;">qBit</span></div>
+              </div>
+              <div class="m-card" style="flex:1;flex-direction:row;gap:4px;padding:6px 8px;justify-content:center;">
+                <span style="font-size:0.72rem;">🔒</span>
+                <span style="font-size:0.55rem;font-weight:700;">VPN</span>
+                <span style="font-size:0.5rem;color:#22c55e;font-weight:700;">ON</span>
+              </div>
+            </div>
+            <!-- Tools (collapsed) -->
+            <div class="m-card" style="flex-direction:row;justify-content:space-between;padding:6px 10px;">
+              <span style="font-size:0.58rem;font-weight:700;color:#64748b;">⚙ <span data-i18n="mock_tools">Eines</span></span>
+              <span style="font-size:0.7rem;color:#94a3b8;">›</span>
             </div>
             <div class="m-path">📁 D:\media\moss</div>
           </div>
@@ -375,7 +394,7 @@
 
 <!-- STATS BAR -->
 <div class="stats-bar">
-  <div class="stat fade-up"><div class="stat-num">6</div><div class="stat-label" data-i18n="stat1">Serveis integrats</div></div>
+  <div class="stat fade-up"><div class="stat-num">9</div><div class="stat-label" data-i18n="stat1">Serveis integrats</div></div>
   <div class="stat fade-up delay-1"><div class="stat-num">1</div><div class="stat-label" data-i18n="stat2">Clic per instal·lar</div></div>
   <div class="stat fade-up delay-2"><div class="stat-num">0€</div><div class="stat-label" data-i18n="stat3">Cost de llicència</div></div>
   <div class="stat fade-up delay-3"><div class="stat-num">3</div><div class="stat-label" data-i18n="stat4">Idiomes inclosos</div></div>
@@ -393,6 +412,7 @@
       <div class="pill"><span>📺</span> Sonarr <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_sonarr">Sèries</span></div>
       <div class="pill"><span>🔌</span> Prowlarr <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_prowlarr">Indexadors</span></div>
       <div class="pill"><span>⬇️</span> qBittorrent <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_qbit">Descàrregues</span></div>
+      <div class="pill"><span>💬</span> Bazarr <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_bazarr">Subtítols</span></div>
       <div class="pill"><span>🔒</span> Gluetun <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_gluetun">VPN opcional</span></div>
     </div>
   </div>
@@ -647,10 +667,11 @@ const i18n = {
     hero_btn_dl:"Descarregar Moss", hero_btn_gh:"Veure a GitHub",
     hero_note:"Windows 10 / 11 &nbsp;·&nbsp; macOS 12+ &nbsp;·&nbsp; x64 &nbsp;·&nbsp; Requereix Docker Desktop (gratuït)",
     mock_running:"En marxa", mock_stop:"Parar", mock_active:"● actiu",
-    mock_nav_home:"INICI", mock_nav_vpn:"VPN", mock_nav_net:"XARXA", mock_nav_cfg:"CONFIG",
+    mock_nav_home:"INICI", mock_nav_vpn:"VPN", mock_nav_net:"XARXA", mock_nav_cfg:"CFG",
+    mock_cinema:"Cinema", mock_request:"Sol·licituds", mock_downloads:"Descàrregues", mock_tools:"Eines",
     stat1:"Serveis integrats", stat2:"Clic per instal·lar", stat3:"Cost de llicència", stat4:"Idiomes inclosos",
     pills_eyebrow:"Tot inclòs", pills_title:"Tots els serveis, configurats per tu",
-    pill_jellyfin:"Reproductor", pill_jellyseerr:"Peticions", pill_radarr:"Pel·lícules", pill_sonarr:"Sèries", pill_prowlarr:"Indexadors", pill_qbit:"Descàrregues", pill_gluetun:"VPN opcional",
+    pill_jellyfin:"Reproductor", pill_jellyseerr:"Peticions", pill_radarr:"Pel·lícules", pill_sonarr:"Sèries", pill_prowlarr:"Indexadors", pill_qbit:"Descàrregues", pill_bazarr:"Subtítols", pill_gluetun:"VPN opcional",
     feat_eyebrow:"Per què Moss?", feat_title:"Tot el que necessites,<br/>sense la complexitat",
     feat1_title:"El teu propi Netflix", feat1_desc:"Jellyfin t'ofereix una interfície elegant per veure pel·lícules i sèries des de qualsevol dispositiu — TV, mòbil, tablet, navegador.",
     feat2_title:"Accés des de qualsevol lloc", feat2_desc:"Moss mostra les URLs de tots els serveis per la xarxa local. Per accés extern sense obrir ports, s'integra fàcilment amb Tailscale.",
@@ -699,10 +720,11 @@ const i18n = {
     hero_btn_dl:"Descargar Moss", hero_btn_gh:"Ver en GitHub",
     hero_note:"Windows 10 / 11 &nbsp;·&nbsp; macOS 12+ &nbsp;·&nbsp; x64 &nbsp;·&nbsp; Requiere Docker Desktop (gratuito)",
     mock_running:"En marcha", mock_stop:"Parar", mock_active:"● activo",
-    mock_nav_home:"INICIO", mock_nav_vpn:"VPN", mock_nav_net:"RED", mock_nav_cfg:"CONFIG",
+    mock_nav_home:"INICIO", mock_nav_vpn:"VPN", mock_nav_net:"RED", mock_nav_cfg:"CFG",
+    mock_cinema:"Cinema", mock_request:"Solicitudes", mock_downloads:"Descargas", mock_tools:"Herramientas",
     stat1:"Servicios integrados", stat2:"Clic para instalar", stat3:"Coste de licencia", stat4:"Idiomas incluidos",
     pills_eyebrow:"Todo incluido", pills_title:"Todos los servicios, configurados para ti",
-    pill_jellyfin:"Reproductor", pill_jellyseerr:"Peticiones", pill_radarr:"Películas", pill_sonarr:"Series", pill_prowlarr:"Indexadores", pill_qbit:"Descargas", pill_gluetun:"VPN opcional",
+    pill_jellyfin:"Reproductor", pill_jellyseerr:"Peticiones", pill_radarr:"Películas", pill_sonarr:"Series", pill_prowlarr:"Indexadores", pill_qbit:"Descargas", pill_bazarr:"Subtítulos", pill_gluetun:"VPN opcional",
     feat_eyebrow:"¿Por qué Moss?", feat_title:"Todo lo que necesitas,<br/>sin la complejidad",
     feat1_title:"Tu propio Netflix", feat1_desc:"Jellyfin te ofrece una interfaz elegante para ver películas y series desde cualquier dispositivo — TV, móvil, tablet, navegador.",
     feat2_title:"Acceso desde cualquier lugar", feat2_desc:"Moss muestra las URLs de todos los servicios en la red local. Para acceso externo sin abrir puertos, se integra fácilmente con Tailscale.",
@@ -751,10 +773,11 @@ const i18n = {
     hero_btn_dl:"Download Moss", hero_btn_gh:"View on GitHub",
     hero_note:"Windows 10 / 11 &nbsp;·&nbsp; macOS 12+ &nbsp;·&nbsp; x64 &nbsp;·&nbsp; Requires Docker Desktop (free)",
     mock_running:"Running", mock_stop:"Stop", mock_active:"● active",
-    mock_nav_home:"HOME", mock_nav_vpn:"VPN", mock_nav_net:"NETWORK", mock_nav_cfg:"CONFIG",
+    mock_nav_home:"HOME", mock_nav_vpn:"VPN", mock_nav_net:"NETWORK", mock_nav_cfg:"CFG",
+    mock_cinema:"Cinema", mock_request:"Requests", mock_downloads:"Downloads", mock_tools:"Tools",
     stat1:"Integrated services", stat2:"Click to install", stat3:"License cost", stat4:"Languages included",
     pills_eyebrow:"All included", pills_title:"All services, configured for you",
-    pill_jellyfin:"Player", pill_jellyseerr:"Requests", pill_radarr:"Movies", pill_sonarr:"TV Shows", pill_prowlarr:"Indexers", pill_qbit:"Downloads", pill_gluetun:"Optional VPN",
+    pill_jellyfin:"Player", pill_jellyseerr:"Requests", pill_radarr:"Movies", pill_sonarr:"TV Shows", pill_prowlarr:"Indexers", pill_qbit:"Downloads", pill_bazarr:"Subtitles", pill_gluetun:"Optional VPN",
     feat_eyebrow:"Why Moss?", feat_title:"Everything you need,<br/>without the complexity",
     feat1_title:"Your own Netflix", feat1_desc:"Jellyfin gives you an elegant interface to watch movies and shows from any device — TV, phone, tablet, browser.",
     feat2_title:"Access from anywhere", feat2_desc:"Moss shows the URLs of all services on your local network. For external access without port forwarding, it integrates easily with Tailscale.",
