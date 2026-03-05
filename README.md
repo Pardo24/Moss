@@ -4,7 +4,7 @@
 
 One installer. Jellyfin, Sonarr, Radarr, Prowlarr, Bazarr, qBittorrent, Jellyseerr and a VPN, all running together with Docker.
 
-> *Gecko* is quick, green and very resilient — because your media deserves a software like this.
+> *Gecko* is a lizard, green and very resilient — i like them a lot.
 
 ---
 
