@@ -13,6 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     /* ─── Tokens ──────────────────────────────────────────────────────── */
     :root {
@@ -94,13 +95,14 @@
     .header-inner { height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
     .logo { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 1.25rem; letter-spacing: -0.02em; color: var(--text); }
     .logo-mark { width: 36px; height: 36px; border-radius: 10px; background: var(--accent-g); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 12px rgba(13,148,136,0.32); flex-shrink: 0; }
-    .logo-mark img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+    .logo-mark img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; mix-blend-mode: screen; }
     nav { display: flex; align-items: center; gap: 28px; }
     nav a { font-size: 0.88rem; font-weight: 500; color: var(--text-2); transition: color 0.15s; }
     nav a:hover { color: var(--text); }
     .nav-sep { width: 1px; height: 18px; background: var(--border); flex-shrink: 0; }
     .nav-cta { display: flex; align-items: center; gap: 24px; }
     .fa-icon { font-size: 0.95em; }
+    .nav-bmc .fa-icon { width: 14px; height: 14px; }
 
     /* ─── Buy Me a Coffee ────────────────────────────────────────────── */
     .btn-bmc { display: inline-flex; align-items: center; gap: 7px; background: #FFDD00; color: #000; font-weight: 700; font-size: 0.9rem; padding: 10px 22px; border-radius: 10px; text-decoration: none; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 2px 12px rgba(255,221,0,0.3); }
@@ -154,11 +156,15 @@
     .dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: #28c840; }
     .mockup-url { margin-left: 12px; background: rgba(0,0,0,0.05); border-radius: 6px; padding: 3px 14px; font-size: 0.72rem; color: var(--text-3); font-family: 'SF Mono', 'Consolas', monospace; flex: 1; max-width: 260px; text-align: center; }
     .mockup-body { display: flex; height: 320px; background: #f6f8ff; }
-    .m-sidebar { width: 72px; background: #ffffff; border-right: 1px solid rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center; padding: 16px 0; gap: 2px; }
-    .m-logo { width: 34px; height: 34px; border-radius: 10px; background: var(--accent-g); display: flex; align-items: center; justify-content: center; font-size: 1.05rem; box-shadow: 0 3px 8px rgba(13,148,136,0.28); margin-bottom: 14px; }
-    .m-nav { width: 100%; padding: 10px 0; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 0.55rem; font-weight: 700; color: #94a3b8; border-left: 3px solid transparent; letter-spacing: 0.02em; text-transform: uppercase; cursor: default; }
-    .m-nav span:first-child { font-size: 0.95rem; }
+    .m-sidebar { width: 78px; background: #ffffff; border-right: 1px solid rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center; padding: 16px 0; gap: 4px; }
+    .m-logo { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: none; margin-bottom: 16px; overflow: hidden; border: 1px solid rgba(13,148,136,0.25); }
+    .m-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 11px; mix-blend-mode: screen; }
+    .m-nav { width: 100%; padding: 9px 0; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.55rem; font-weight: 700; color: #94a3b8; border-left: 3px solid transparent; text-transform: uppercase; cursor: default; letter-spacing: 0.06em; }
+    .m-nav-icon { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: transparent; color: #94a3b8; font-size: 0.85rem; }
+    .m-nav-icon svg { width: 14px; height: 14px; }
+    .m-nav-label { font-size: 0.55rem; }
     .m-nav.active { color: var(--accent); background: rgba(13,148,136,0.07); border-left-color: var(--accent); }
+    .m-nav.active .m-nav-icon { background: rgba(13,148,136,0.15); color: var(--accent); }
     .m-lang { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 2px; padding-bottom: 8px; }
     .m-lang span { font-size: 0.52rem; font-weight: 700; color: #cbd5e1; font-family: monospace; }
     .m-lang span.al { color: var(--accent); }
@@ -167,10 +173,15 @@
     .m-badge { display: inline-flex; align-items: center; gap: 5px; background: #dcfce7; color: #15803d; padding: 3px 10px; border-radius: 99px; font-size: 0.65rem; font-weight: 700; }
     .m-badge::before { content:''; width:6px; height:6px; border-radius:50%; background:#22c55e; }
     .m-stopbtn { padding: 4px 12px; border-radius: 7px; background: rgba(220,38,38,0.08); color: #dc2626; font-size: 0.62rem; font-weight: 700; }
-    .m-refresh { padding: 4px 8px; border-radius: 7px; background: rgba(0,0,0,0.04); color: #94a3b8; font-size: 0.65rem; margin-left: 4px; }
+    .m-refresh { padding: 4px 8px; border-radius: 7px; background: rgba(0,0,0,0.04); color: #94a3b8; font-size: 0.65rem; margin-left: 4px; display:flex; align-items:center; justify-content:center; }
     .m-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; }
     .m-card { background: #fff; border: 1px solid rgba(0,0,0,0.07); border-radius: 10px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.55rem; font-weight: 700; color: #64748b; letter-spacing: 0.01em; }
-    .m-path { font-size: 0.56rem; color: #cbd5e1; font-family: monospace; padding: 0 2px; }
+    .m-service-icon { width: 24px; height: 24px; object-fit: contain; }
+    .m-path { font-size: 0.56rem; color: #cbd5e1; font-family: monospace; padding: 0 2px; display: flex; align-items: center; gap: 3px; }
+    .m-storage-card { margin-top: 6px; }
+    .m-storage-track { width: 100%; height: 5px; border-radius: 999px; background: rgba(148,163,184,0.25); overflow: hidden; }
+    .m-storage-fill { height: 100%; width: 40%; background: linear-gradient(90deg,#22c55e,#4ade80); border-radius: inherit; }
+    .m-storage-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.56rem; margin-top: 4px; color: #94a3b8; }
 
     /* ─── Stats bar ───────────────────────────────────────────────────── */
     .stats-bar { display: flex; justify-content: center; flex-wrap: wrap; background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
@@ -183,6 +194,7 @@
     .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     @media(max-width: 820px) { .features-grid { grid-template-columns: 1fr; } }
     .feature-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+    .feature-icon svg { width: 26px; height: 26px; }
     .fi-orange { background: var(--accent-g); }
     .fi-indigo { background: linear-gradient(135deg,#6366f1,#818cf8); }
     .fi-green  { background: linear-gradient(135deg,#22c55e,#4ade80); }
@@ -193,9 +205,16 @@
     .feature-desc  { font-size: 0.88rem; color: var(--text-2); line-height: 1.65; }
 
     /* ─── Services pills ──────────────────────────────────────────────── */
-    .pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-    .pill { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 99px; font-size: 0.875rem; font-weight: 600; box-shadow: var(--shadow-sm); transition: all 0.15s; }
+    .pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+    .pill { display: flex; align-items: center; gap: 10px; padding: 12px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; font-size: 0.875rem; font-weight: 600; box-shadow: var(--shadow-sm); transition: all 0.15s; min-width: 190px; text-align: left; }
     .pill:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .pill-icon { width: 28px; height: 28px; border-radius: 8px; background: #f1f5f9; display: inline-flex; align-items: center; justify-content: center; }
+    .pill-icon--plain { background: transparent; }
+    .pill-icon img { width: 100%; height: 100%; object-fit: contain; }
+    .pill-icon svg { width: 20px; height: 20px; }
+    .pill-text { display: flex; flex-direction: column; gap: 2px; }
+    .pill-title { font-size: 0.9rem; font-weight: 700; }
+    .pill-desc { font-size: 0.78rem; color: var(--text-3); font-weight: 500; }
 
     /* ─── Steps ───────────────────────────────────────────────────────── */
     .steps { display: flex; flex-direction: column; }
@@ -297,7 +316,7 @@
     </nav>
 
     <div class="nav-cta">
-      <a href="https://buymeacoffee.com/danipardo24" target="_blank" rel="noopener" class="nav-bmc hide-sm"><i class="fa-solid fa-mug-hot fa-icon"></i> <span data-i18n="nav_bmc">Suport</span></a>
+      <a href="https://buymeacoffee.com/danipardo24" target="_blank" rel="noopener" class="nav-bmc hide-sm"><i data-lucide="coffee" class="fa-icon"></i> <span data-i18n="nav_bmc">Suport</span></a>
       <a href="#download" class="btn btn-primary" style="padding:9px 20px;font-size:0.85rem;" data-i18n="nav_download">
         Descarregar
       </a>
@@ -323,7 +342,7 @@
       en el teu ordinador en menys de 5 minuts. Sense comandos, sense complicacions.
     </p>
 
-    <div class="free-badge"><i class="fa-solid fa-check"></i> <span data-i18n="hero_free">100% gratuït · per sempre</span></div>
+    <div class="free-badge"><i data-lucide="check"></i> <span data-i18n="hero_free">100% gratuït · per sempre</span></div>
     <div class="hero-buttons">
       <a href="#download" class="btn btn-primary" style="font-size:1rem;padding:15px 36px;" data-i18n="hero_btn_dl">
         Descarregar Gecko
@@ -338,53 +357,96 @@
       <div class="mockup">
         <div class="mockup-bar">
           <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
-          <div class="mockup-url">moss · Dashboard</div>
+          <div class="mockup-url">Gecko · Dashboard</div>
         </div>
-        <div class="mockup-body">
+          <div class="mockup-body">
           <div class="m-sidebar">
-            <div class="m-logo">🌿</div>
-            <div class="m-nav active"><span>⌂</span><span data-i18n="mock_nav_home">INICI</span></div>
-            <div class="m-nav"><span>◉</span><span data-i18n="mock_nav_vpn">VPN</span></div>
-            <div class="m-nav"><span>⊕</span><span data-i18n="mock_nav_net">XARXA</span></div>
-            <div class="m-nav"><span>⚙</span><span data-i18n="mock_nav_cfg">CFG</span></div>
+            <div class="m-logo">
+              <img src="icon.png" alt="Gecko" />
+            </div>
+            <div class="m-nav active">
+              <span class="m-nav-icon"><i data-lucide="home"></i></span>
+              <span class="m-nav-label" data-i18n="mock_nav_home">INICI</span>
+            </div>
+            <div class="m-nav">
+              <span class="m-nav-icon"><i data-lucide="shield-check"></i></span>
+              <span class="m-nav-label" data-i18n="mock_nav_vpn">VPN</span>
+            </div>
+            <div class="m-nav">
+              <span class="m-nav-icon"><i data-lucide="globe-2"></i></span>
+              <span class="m-nav-label" data-i18n="mock_nav_net">XARXA</span>
+            </div>
+            <div class="m-nav">
+              <span class="m-nav-icon"><i data-lucide="settings-2"></i></span>
+              <span class="m-nav-label" data-i18n="mock_nav_cfg">CFG</span>
+            </div>
             <div class="m-lang"><span class="al">CA</span><span>ES</span><span>EN</span></div>
           </div>
           <div class="m-content">
             <!-- Status bar — new Docker Desktop style -->
             <div class="m-status" style="border-left:2.5px solid #22c55e;padding:8px 12px;gap:8px;display:flex;align-items:center;">
-              <div style="width:26px;height:26px;border-radius:7px;background:rgba(34,197,94,0.1);display:flex;align-items:center;justify-content:center;color:#22c55e;font-size:0.7rem;flex-shrink:0;">⚡</div>
+              <div style="width:26px;height:26px;border-radius:7px;background:rgba(34,197,94,0.1);display:flex;align-items:center;justify-content:center;color:#22c55e;font-size:0.7rem;flex-shrink:0;">
+                <i data-lucide="zap" style="width:14px;height:14px;"></i>
+              </div>
               <div style="flex:1;">
                 <div style="font-size:0.62rem;font-weight:700;color:#111;line-height:1.2;">Gecko</div>
                 <div style="font-size:0.53rem;color:#22c55e;font-weight:600;" data-i18n="mock_running">En marxa</div>
               </div>
               <div style="display:flex;gap:4px;align-items:center;">
                 <div class="m-stopbtn" data-i18n="mock_stop">Parar</div>
-                <div class="m-refresh">↻</div>
+                <div class="m-refresh"><i data-lucide="refresh-cw" style="width:14px;height:14px;"></i></div>
               </div>
             </div>
             <!-- Primary 2-col service cards -->
             <div class="m-grid" style="grid-template-columns:1fr 1fr;">
-              <div class="m-card" style="padding:12px 8px 8px;gap:5px;"><span style="font-size:1.2rem">🎬</span><div style="font-size:0.62rem;font-weight:700;">Jellyfin</div><div style="font-size:0.5rem;color:#94a3b8;" data-i18n="mock_cinema">Cinema</div></div>
-              <div class="m-card" style="padding:12px 8px 8px;gap:5px;"><span style="font-size:1.2rem">🔍</span><div style="font-size:0.62rem;font-weight:700;">Jellyseerr</div><div style="font-size:0.5rem;color:#94a3b8;" data-i18n="mock_request">Sol·licituds</div></div>
+              <div class="m-card" style="padding:12px 8px 8px;gap:5px;">
+                <img class="m-service-icon" src="../src/assets/services/jellyfin.svg" alt="Jellyfin" />
+                <div style="font-size:0.62rem;font-weight:700;">Jellyfin</div>
+                <div style="font-size:0.5rem;color:#94a3b8;" data-i18n="mock_cinema">Cinema</div>
+              </div>
+              <div class="m-card" style="padding:12px 8px 8px;gap:5px;">
+                <img class="m-service-icon" src="../src/assets/services/jellyseerr.svg" alt="Jellyseerr" />
+                <div style="font-size:0.62rem;font-weight:700;">Jellyseerr</div>
+                <div style="font-size:0.5rem;color:#94a3b8;" data-i18n="mock_request">Sol·licituds</div>
+              </div>
             </div>
             <!-- Downloads + VPN row -->
             <div style="display:flex;gap:7px;">
               <div class="m-card" style="flex:2;flex-direction:row;justify-content:space-between;padding:6px 10px;">
                 <span style="font-size:0.58rem;font-weight:700;color:#64748b;" data-i18n="mock_downloads">Descàrregues</span>
-                <div style="display:flex;align-items:center;gap:3px;"><span style="font-size:0.8rem;">⬇️</span><span style="font-size:0.55rem;font-weight:700;">qBit</span></div>
+                <div style="display:flex;align-items:center;gap:3px;">
+                  <i data-lucide="download" style="width:14px;height:14px;"></i>
+                  <span style="font-size:0.55rem;font-weight:700;">qBit</span>
+                </div>
               </div>
               <div class="m-card" style="flex:1;flex-direction:row;gap:4px;padding:6px 8px;justify-content:center;">
-                <span style="font-size:0.72rem;">🔒</span>
+                <i data-lucide="shield-check" style="width:14px;height:14px;"></i>
                 <span style="font-size:0.55rem;font-weight:700;">VPN</span>
                 <span style="font-size:0.5rem;color:#22c55e;font-weight:700;">ON</span>
               </div>
             </div>
             <!-- Tools (collapsed) -->
             <div class="m-card" style="flex-direction:row;justify-content:space-between;padding:6px 10px;">
-              <span style="font-size:0.58rem;font-weight:700;color:#64748b;">⚙ <span data-i18n="mock_tools">Eines</span></span>
+              <span style="font-size:0.58rem;font-weight:700;color:#64748b;">
+                <i data-lucide="settings-2" style="width:14px;height:14px;margin-right:4px;"></i>
+                <span data-i18n="mock_tools">Eines</span>
+              </span>
               <span style="font-size:0.7rem;color:#94a3b8;">›</span>
             </div>
-            <div class="m-path">📁 D:\media\moss</div>
+            <!-- Storage card -->
+            <div class="m-card m-storage-card" style="align-items:stretch;padding:8px 10px;gap:6px;">
+              <div class="m-path" style="color:#94a3b8;">
+                <i data-lucide="folder-open" style="width:12px;height:12px;margin-right:4px;"></i>
+                D:\Gecko\media
+              </div>
+              <div class="m-storage-track">
+                <div class="m-storage-fill"></div>
+              </div>
+              <div class="m-storage-meta">
+                <span data-i18n="mock_data">320 GB usats</span>
+                <span data-i18n="mock_free">680 GB lliures</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -406,14 +468,78 @@
     <p class="section-eyebrow" data-i18n="pills_eyebrow">Tot inclòs</p>
     <h2 class="section-title" style="margin-bottom:40px;" data-i18n="pills_title">Tots els serveis, configurats per tu</h2>
     <div class="pills">
-      <div class="pill"><span>🎬</span> Jellyfin <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_jellyfin">Reproductor</span></div>
-      <div class="pill"><span>🔍</span> Jellyseerr <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_jellyseerr">Peticions</span></div>
-      <div class="pill"><span>🎥</span> Radarr <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_radarr">Pel·lícules</span></div>
-      <div class="pill"><span>📺</span> Sonarr <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_sonarr">Sèries</span></div>
-      <div class="pill"><span>🔌</span> Prowlarr <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_prowlarr">Indexadors</span></div>
-      <div class="pill"><span>⬇️</span> qBittorrent <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_qbit">Descàrregues</span></div>
-      <div class="pill"><span>💬</span> Bazarr <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_bazarr">Subtítols</span></div>
-      <div class="pill"><span>🔒</span> Gluetun <span style="font-size:0.75rem;color:var(--text-3);font-weight:500" data-i18n="pill_gluetun">VPN opcional</span></div>
+      <div class="pill">
+        <div class="pill-icon pill-icon--plain">
+          <img src="../src/assets/services/jellyfin.svg" alt="Jellyfin" />
+        </div>
+        <div class="pill-text">
+          <div class="pill-title">Jellyfin</div>
+          <div class="pill-desc" data-i18n="pill_jellyfin">Reproductor</div>
+        </div>
+      </div>
+      <div class="pill">
+        <div class="pill-icon">
+          <img src="../src/assets/services/jellyseerr.svg" alt="Jellyseerr" />
+        </div>
+        <div class="pill-text">
+          <div class="pill-title">Jellyseerr</div>
+          <div class="pill-desc" data-i18n="pill_jellyseerr">Peticions</div>
+        </div>
+      </div>
+      <div class="pill">
+        <div class="pill-icon pill-icon--plain">
+          <img src="../src/assets/services/radarr.svg" alt="Radarr" />
+        </div>
+        <div class="pill-text">
+          <div class="pill-title">Radarr</div>
+          <div class="pill-desc" data-i18n="pill_radarr">Pel·lícules</div>
+        </div>
+      </div>
+      <div class="pill">
+        <div class="pill-icon">
+          <img src="../src/assets/services/sonarr.svg" alt="Sonarr" />
+        </div>
+        <div class="pill-text">
+          <div class="pill-title">Sonarr</div>
+          <div class="pill-desc" data-i18n="pill_sonarr">Sèries</div>
+        </div>
+      </div>
+      <div class="pill">
+        <div class="pill-icon">
+          <img src="../src/assets/services/prowlarr.svg" alt="Prowlarr" />
+        </div>
+        <div class="pill-text">
+          <div class="pill-title">Prowlarr</div>
+          <div class="pill-desc" data-i18n="pill_prowlarr">Indexadors</div>
+        </div>
+      </div>
+      <div class="pill">
+        <div class="pill-icon">
+          <img src="../src/assets/services/qbittorrent.svg" alt="qBittorrent" />
+        </div>
+        <div class="pill-text">
+          <div class="pill-title">qBittorrent</div>
+          <div class="pill-desc" data-i18n="pill_qbit">Descàrregues</div>
+        </div>
+      </div>
+      <div class="pill">
+        <div class="pill-icon">
+          <img src="../src/assets/services/bazarr.png" alt="Bazarr" />
+        </div>
+        <div class="pill-text">
+          <div class="pill-title">Bazarr</div>
+          <div class="pill-desc" data-i18n="pill_bazarr">Subtítols</div>
+        </div>
+      </div>
+      <div class="pill">
+        <div class="pill-icon">
+          <i data-lucide="shield"></i>
+        </div>
+        <div class="pill-text">
+          <div class="pill-title">Gluetun</div>
+          <div class="pill-desc" data-i18n="pill_gluetun">VPN opcional</div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -429,32 +555,32 @@
     </div>
     <div class="features-grid">
       <div class="card fade-up">
-        <div class="feature-icon fi-orange">🎬</div>
+        <div class="feature-icon fi-orange"><i data-lucide="clapperboard"></i></div>
         <div class="feature-title" data-i18n="feat1_title">El teu propi Netflix</div>
         <div class="feature-desc" data-i18n="feat1_desc">Jellyfin t'ofereix una interfície elegant per veure pel·lícules i sèries des de qualsevol dispositiu — TV, mòbil, tablet, navegador.</div>
       </div>
       <div class="card fade-up delay-1">
-        <div class="feature-icon fi-indigo">🌐</div>
+        <div class="feature-icon fi-indigo"><i data-lucide="globe-2"></i></div>
         <div class="feature-title" data-i18n="feat2_title">Accés des de qualsevol lloc</div>
         <div class="feature-desc" data-i18n="feat2_desc">Gecko mostra les URLs de tots els serveis per la xarxa local. Per accés extern sense obrir ports, s'integra fàcilment amb Tailscale.</div>
       </div>
       <div class="card fade-up delay-2">
-        <div class="feature-icon fi-green">🔒</div>
+        <div class="feature-icon fi-green"><i data-lucide="shield-check"></i></div>
         <div class="feature-title" data-i18n="feat3_title">VPN integrada</div>
         <div class="feature-desc" data-i18n="feat3_desc">Activa ProtonVPN o Mullvad des del dashboard en un formulari senzill. Les descàrregues passaran per un túnel xifrat automàticament.</div>
       </div>
       <div class="card fade-up">
-        <div class="feature-icon fi-blue">⚡</div>
+        <div class="feature-icon fi-blue"><i data-lucide="zap"></i></div>
         <div class="feature-title" data-i18n="feat4_title">Instal·lació en 1 clic</div>
         <div class="feature-desc" data-i18n="feat4_desc">L'assistent de Gecko configura tota la infraestructura Docker automàticament. Sense fitxers de configuració, sense comandes de terminal.</div>
       </div>
       <div class="card fade-up delay-1">
-        <div class="feature-icon fi-rose">🛠️</div>
+        <div class="feature-icon fi-rose"><i data-lucide="panel-left"></i></div>
         <div class="feature-title" data-i18n="feat5_title">Dashboard de gestió</div>
         <div class="feature-desc" data-i18n="feat5_desc">Atura i arrenca el stack, gestiona la VPN, consulta les URLs de la xarxa i configura l'idioma des d'una interfície unificada.</div>
       </div>
       <div class="card fade-up delay-2">
-        <div class="feature-icon fi-amber">🌍</div>
+        <div class="feature-icon fi-amber"><i data-lucide="languages"></i></div>
         <div class="feature-title" data-i18n="feat6_title">3 idiomes inclosos</div>
         <div class="feature-desc" data-i18n="feat6_desc">Gecko és disponible en català, castellà i anglès. Canvia d'idioma en qualsevol moment des del panell lateral, sense reiniciar.</div>
       </div>
@@ -519,7 +645,7 @@
       <p class="section-desc" style="margin:0 auto;" data-i18n="vpn_desc">Una VPN amaga les teves descàrregues del teu proveïdor d'internet. Gecko la integra en un sol pas, sense configuració extra.</p>
     </div>
     <div class="vpn-card fade-up">
-      <div class="vpn-icon">🛡️</div>
+      <div class="vpn-icon"><i data-lucide="shield-check"></i></div>
       <div style="flex:1;">
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
           <h3 style="font-size:1.35rem;font-weight:900;color:#15803d;">ProtonVPN</h3>
@@ -607,7 +733,7 @@
     <p class="cta-note" data-i18n="cta_note">Windows 10 / 11 &nbsp;·&nbsp; macOS 12+ &nbsp;·&nbsp; x64 &nbsp;·&nbsp; v1.0.6 &nbsp;·&nbsp; Docker Desktop necessari (gratuït)</p>
     <div style="margin-top:28px;">
       <a href="https://buymeacoffee.com/danipardo24" target="_blank" rel="noopener" class="btn-bmc">
-        <i class="fa-solid fa-mug-hot" style="margin-right:6px;"></i><span data-i18n="bmc_btn">Invita'm a un cafè</span>
+        <i data-lucide="coffee" style="margin-right:6px;"></i><span data-i18n="bmc_btn">Invita'm a un cafè</span>
       </a>
       <p style="font-size:0.78rem;color:var(--text-2);margin-top:10px;" data-i18n="bmc_sub">Si Gecko t'ha estat útil, pots donar suport al projecte amb un cafè.</p>
     </div>
@@ -710,6 +836,8 @@ const i18n = {
     footer_bmc:"☕ Suport al projecte",
     bmc_btn:"Invita'm a un cafè",
     bmc_sub:"Si Gecko t'ha estat útil, pots donar suport al projecte amb un cafè.",
+    mock_data: "320 GB usats",
+    mock_free: "680 GB lliures"
   },
   es: {
     nav_features:"Características", nav_how:"Cómo funciona", nav_guide:"Guía", nav_download:"Descargar", nav_bmc:"Apoya",
@@ -763,6 +891,8 @@ const i18n = {
     footer_bmc:"☕ Apoya el proyecto",
     bmc_btn:"Invítame a un café",
     bmc_sub:"Si Gecko te ha sido útil, puedes apoyar el proyecto con un café.",
+    mock_data: "320 GB usados",
+    mock_free: "680 GB libres"
   },
   en: {
     nav_features:"Features", nav_how:"How it works", nav_guide:"Guide", nav_download:"Download", nav_bmc:"Support",
@@ -816,6 +946,8 @@ const i18n = {
     footer_bmc:"☕ Support the project",
     bmc_btn:"Buy me a coffee",
     bmc_sub:"If Gecko has been useful to you, you can support the project with a coffee.",
+    mock_data: "320 GB used",
+    mock_free: "680 GB free"
   }
 };
 
@@ -891,6 +1023,11 @@ const observer = new IntersectionObserver(
   { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
 );
 document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+// Lucide icons
+if (window.lucide && window.lucide.createIcons) {
+  window.lucide.createIcons();
+}
 </script>
 
 </body>
