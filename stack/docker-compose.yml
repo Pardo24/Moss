@@ -1,7 +1,12 @@
 # ============================================================
 # Media Stack — Jellyfin + *arr + qBittorrent (Mullvad VPN)
-# Arrancar:  docker compose -f docker-compose.media.yml up -d
-# Parar:     docker compose -f docker-compose.media.yml down
+# Arrancar:  docker compose up -d
+# Parar:     docker compose down
+#
+# NOTA: Los configs de servicios usan volúmenes Docker internos
+# (ext4 dentro de la VM de Docker) para evitar corrupción de
+# SQLite en NTFS/Windows. Los archivos de media siguen en
+# DATA_PATH porque son solo ficheros grandes, no bases de datos.
 # ============================================================
 
 networks:
@@ -22,8 +27,8 @@ services:
       - "${JELLYFIN_PORT:-8096}:8096"
       - "1900:1900/udp"
     volumes:
-      - ${DATA_PATH}/jellyfin/config:/config
-      - ${DATA_PATH}/jellyfin/cache:/cache
+      - jellyfin_config:/config           # volumen interno — SQLite protegido
+      - jellyfin_cache:/cache             # volumen interno — cache transcoding
       - ${DATA_PATH}/jellyfin/media/movies:/media/movies
       - ${DATA_PATH}/jellyfin/media/series:/media/series
       - ${DATA_PATH}/jellyfin/media/music:/media/music
@@ -45,7 +50,7 @@ services:
     ports:
       - "${JELLYSEERR_PORT:-5055}:5055"
     volumes:
-      - ${DATA_PATH}/jellyseerr/config:/app/config
+      - jellyseerr_config:/app/config     # volumen interno — SQLite protegido
     environment:
       TZ: ${TZ:-Europe/Madrid}
     deploy:
@@ -64,7 +69,7 @@ services:
     ports:
       - "${PROWLARR_PORT:-9696}:9696"
     volumes:
-      - ${DATA_PATH}/prowlarr/config:/config
+      - prowlarr_config:/config           # volumen interno — SQLite protegido
     environment:
       PUID: 1000
       PGID: 1000
@@ -85,7 +90,7 @@ services:
     ports:
       - "${RADARR_PORT:-7878}:7878"
     volumes:
-      - ${DATA_PATH}/radarr/config:/config
+      - radarr_config:/config             # volumen interno — SQLite protegido
       - ${DATA_PATH}/downloads:/downloads
       - ${DATA_PATH}/jellyfin/media/movies:/movies
     environment:
@@ -108,7 +113,7 @@ services:
     ports:
       - "${SONARR_PORT:-8989}:8989"
     volumes:
-      - ${DATA_PATH}/sonarr/config:/config
+      - sonarr_config:/config             # volumen interno — SQLite protegido
       - ${DATA_PATH}/downloads:/downloads
       - ${DATA_PATH}/jellyfin/media/series:/tv
     environment:
@@ -131,7 +136,7 @@ services:
     ports:
       - "${LIDARR_PORT:-8686}:8686"
     volumes:
-      - ${DATA_PATH}/lidarr/config:/config
+      - lidarr_config:/config             # volumen interno — SQLite protegido
       - ${DATA_PATH}/downloads:/downloads
       - ${DATA_PATH}/jellyfin/media/music:/music
     environment:
@@ -154,7 +159,7 @@ services:
     ports:
       - "${BAZARR_PORT:-6767}:6767"
     volumes:
-      - ${DATA_PATH}/bazarr/config:/config
+      - bazarr_config:/config             # volumen interno — SQLite protegido
       - ${DATA_PATH}/jellyfin/media/movies:/movies
       - ${DATA_PATH}/jellyfin/media/series:/tv
     environment:
@@ -212,7 +217,7 @@ services:
       gluetun:
         condition: service_healthy
     volumes:
-      - ${DATA_PATH}/qbittorrent/config:/config
+      - qbittorrent_config:/config        # volumen interno — config protegido
       - ${DATA_PATH}/downloads:/downloads
     environment:
       PUID: 1000
@@ -224,3 +229,19 @@ services:
         limits:
           cpus: "1.0"
           memory: 512M
+
+# ============================================================
+# Volúmenes Docker internos — protegen las DBs SQLite de la
+# corrupción causada por NTFS + WSL2 + Docker Desktop en Windows
+# Docker los crea automáticamente en el primer `docker compose up`
+# ============================================================
+volumes:
+  jellyfin_config:
+  jellyfin_cache:
+  jellyseerr_config:
+  prowlarr_config:
+  radarr_config:
+  sonarr_config:
+  lidarr_config:
+  bazarr_config:
+  qbittorrent_config:

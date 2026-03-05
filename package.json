@@ -1,5 +1,5 @@
 {
-  "name": "moss",
+  "name": "gecko",
   "productName": "Gecko",
   "version": "1.0.7",
   "description": "Your wild home media server",
@@ -18,7 +18,7 @@
     "email": "danielp.5@hotmail.com"
   },
   "license": "MIT",
-  "repository": "https://github.com/Pardo24/caliu",
+  "repository": "https://github.com/Pardo24/Moss",
   "devDependencies": {
     "@electron-forge/cli": "^7.11.1",
     "@electron-forge/maker-deb": "^7.11.1",

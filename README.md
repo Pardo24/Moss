@@ -4,7 +4,6 @@
 
 One installer. Jellyfin, Sonarr, Radarr, Prowlarr, Bazarr, qBittorrent, Jellyseerr and a VPN, all running together with Docker.
 
-> *Gecko* is a lizard, green and very resilient — i like them a lot.
 
 ---
 
@@ -56,7 +55,7 @@ Get the latest release for your platform:
 | Platform | File |
 |---|---|
 | Windows | `Gecko-Setup.exe` |
-| macOS | `gecko.dmg` |
+| macOS | `Gecko.dmg` |
 
 ---
 
@@ -82,6 +81,10 @@ npm run make
 **Stack:** Electron · React · TypeScript · Tailwind CSS · Vite
 
 ---
+
+## Support
+
+If Gecko saves you time, consider buying me a coffee ☕
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-danipardo24-teal?logo=buy-me-a-coffee)](https://buymeacoffee.com/danipardo24)
 
