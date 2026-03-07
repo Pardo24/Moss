@@ -274,22 +274,22 @@ function makeQbitDownloadClient(qbitHost: string, adminPassword: string, categor
   };
 }
 
-async function arrAddDownloadClient(port: number, apiKey: string, body: object): Promise<void> {
-  const existing = await arrGet(port, '/api/v3/downloadclient', apiKey);
+async function arrAddDownloadClient(port: number, apiKey: string, body: object, apiVersion = 'v3'): Promise<void> {
+  const existing = await arrGet(port, `/api/${apiVersion}/downloadclient`, apiKey);
   if (existing.status === 200) {
     const clients = JSON.parse(existing.body) as { implementation: string }[];
     if (clients.some(c => c.implementation === 'QBittorrent')) return;
   }
-  await arrPost(port, '/api/v3/downloadclient', apiKey, body);
+  await arrPost(port, `/api/${apiVersion}/downloadclient`, apiKey, body);
 }
 
-async function arrAddRootFolder(port: number, apiKey: string, folderPath: string): Promise<void> {
-  const existing = await arrGet(port, '/api/v3/rootfolder', apiKey);
+async function arrAddRootFolder(port: number, apiKey: string, folderPath: string, apiVersion = 'v3'): Promise<void> {
+  const existing = await arrGet(port, `/api/${apiVersion}/rootfolder`, apiKey);
   if (existing.status === 200) {
     const folders = JSON.parse(existing.body) as { path: string }[];
     if (folders.some(f => f.path === folderPath)) return;
   }
-  await arrPost(port, '/api/v3/rootfolder', apiKey, { path: folderPath });
+  await arrPost(port, `/api/${apiVersion}/rootfolder`, apiKey, { path: folderPath });
 }
 
 // Sets Forms-based web UI authentication on a *arr service, then restarts the
@@ -365,14 +365,15 @@ async function configureLidarr(
   port: number, adminPassword: string, qbitHost: string,
   dockerEnvObj: NodeJS.ProcessEnv,
 ): Promise<string> {
-  const ready = await waitReady(port, '/api/v3/system/status', '', 180);
+  // Lidarr v2.x uses API v1 (not v3 like Radarr/Sonarr)
+  const ready = await waitReady(port, '/api/v1/system/status', '', 180);
   if (!ready) throw new Error('Lidarr not ready');
 
   const apiKey = await readArrApiKey('media_lidarr', dockerEnvObj);
   const client = makeQbitDownloadClient(qbitHost, adminPassword, 'musicCategory', 'lidarr');
-  await arrAddDownloadClient(port, apiKey, client);
-  await arrAddRootFolder(port, apiKey, '/music');
-  await arrSetFormAuth(port, apiKey, '/api/v3', 'admin', adminPassword, 'media_lidarr', dockerEnvObj);
+  await arrAddDownloadClient(port, apiKey, client, 'v1');
+  await arrAddRootFolder(port, apiKey, '/music', 'v1');
+  await arrSetFormAuth(port, apiKey, '/api/v1', 'admin', adminPassword, 'media_lidarr', dockerEnvObj);
   return apiKey;
 }
 
@@ -492,13 +493,13 @@ async function configureBazarr(
   // Connect Radarr
   await jsonPost(port, '/api/radarr', {
     enabled: true, ip: 'media_radarr', port: 7878,
-    apikey: radarrApiKey, ssl: false, base_url: '/', movies_sync: 60,
+    apikey: radarrApiKey, ssl: false, base_url: '', movies_sync: 60,
   }, headers);
 
   // Connect Sonarr
   await jsonPost(port, '/api/sonarr', {
     enabled: true, ip: 'media_sonarr', port: 8989,
-    apikey: sonarrApiKey, ssl: false, base_url: '/', series_sync: 60,
+    apikey: sonarrApiKey, ssl: false, base_url: '', series_sync: 60,
   }, headers);
 
   // Create subtitle language profile
