@@ -12,6 +12,7 @@ import StepStorage from './steps/StepStorage';
 import StepAdmin from './steps/StepAdmin';
 import StepVpn from './steps/StepVpn';
 import StepInstalling from './steps/StepInstalling';
+import StepTailscale from './steps/StepTailscale';
 import StepDone from './steps/StepDone';
 import Dashboard from './Dashboard';
 
@@ -33,7 +34,7 @@ export type Config = {
   qualityLang: 'original' | 'dubbed';
 };
 
-const STEPS = ['welcome', 'target', 'wifi', 'docker', 'storage', 'admin', 'vpn', 'quality', 'installing', 'done'] as const;
+const STEPS = ['welcome', 'target', 'wifi', 'docker', 'storage', 'admin', 'vpn', 'quality', 'installing', 'tailscale', 'done'] as const;
 type Step = typeof STEPS[number];
 
 const SETUP_STEPS = ['docker', 'storage', 'admin', 'vpn'] as const;
@@ -159,6 +160,7 @@ function Wizard({ onInstalled }: { onInstalled: () => void }) {
           {step === 'vpn'        && <StepVpn           {...stepProps} />}
           {step === 'quality'    && <StepQuality       {...stepProps} />}
           {step === 'installing' && <StepInstalling    {...stepProps} />}
+          {step === 'tailscale'  && <StepTailscale     {...stepProps} />}
           {step === 'done'       && <StepDone          {...stepProps} />}
         </div>
       </div>

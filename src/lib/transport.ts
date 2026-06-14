@@ -51,6 +51,14 @@ export interface InstallToDiskState {
   error: string;
 }
 
+export interface TailscaleState {
+  running: boolean;
+  stage: 'idle' | 'starting' | 'waiting-login' | 'serving' | 'connected' | 'failed';
+  loginUrl: string;         // https://login.tailscale.com/... (shown as link + QR)
+  accessUrl: string;        // https://gecko.<tailnet>.ts.net once serving Jellyfin
+  error: string;            // hint when logged in but serve failed (enable HTTPS certs)
+}
+
 interface ElectronAPI {
   checkDocker:       () => Promise<string>;
   startDocker:       () => Promise<void>;
@@ -81,6 +89,11 @@ interface ElectronAPI {
   installToDisk:       (args: { target: string; confirm: string }) => Promise<{ ok: boolean; error?: string }>;
   installToDiskStatus: () => Promise<InstallToDiskState>;
   onInstallToDiskProgress: (cb: (s: InstallToDiskState) => void) => void;
+  // Tailscale remote access (private mesh; exposes only Jellyfin)
+  tailscaleUp:         () => Promise<{ ok: boolean; started?: boolean } & Partial<TailscaleState>>;
+  tailscaleStatus:     () => Promise<TailscaleState>;
+  tailscaleDown:       () => Promise<void>;
+  onTailscaleProgress: (cb: (s: TailscaleState) => void) => void;
 }
 
 declare global {
@@ -145,6 +158,15 @@ function buildHttpShim(): ElectronAPI {
     onInstallToDiskProgress: (cb) => {
       const ev = new EventSource('/api/events');
       ev.addEventListener('install-to-disk-progress', (e) => {
+        cb(JSON.parse((e as MessageEvent).data));
+      });
+    },
+    tailscaleUp:         () => call('tailscale-up'),
+    tailscaleStatus:     () => call('tailscale-status'),
+    tailscaleDown:       () => call('tailscale-down'),
+    onTailscaleProgress: (cb) => {
+      const ev = new EventSource('/api/events');
+      ev.addEventListener('tailscale-progress', (e) => {
         cb(JSON.parse((e as MessageEvent).data));
       });
     },

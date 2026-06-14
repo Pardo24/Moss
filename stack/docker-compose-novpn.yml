@@ -291,6 +291,33 @@ services:
           cpus: "0.25"
           memory: 256M
 
+  # Tailscale — optional private remote access (mesh VPN, WireGuard).
+  # Starts logged-out/idle; Gecko runs `tailscale up` interactively when the
+  # user enables remote access, then `tailscale serve` to expose ONLY Jellyfin
+  # at https://gecko.<tailnet>.ts.net. Never `tailscale funnel` (no public).
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: media_tailscale
+    hostname: gecko                      # → MagicDNS name gecko.<tailnet>.ts.net
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    networks:
+      - media_net
+    volumes:
+      - tailscale_state:/var/lib/tailscale
+    environment:
+      TZ: ${TZ:-Europe/Madrid}
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_USERSPACE: "false"              # use the kernel TUN device (we map /dev/net/tun)
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+
 # ============================================================
 # Volúmenes Docker internos — protegen las DBs SQLite de la
 # corrupción causada por NTFS + WSL2 + Docker Desktop en Windows
@@ -306,3 +333,4 @@ volumes:
   lidarr_config:
   bazarr_config:
   buildarr_state:
+  tailscale_state:

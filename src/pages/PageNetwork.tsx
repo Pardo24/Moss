@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Wifi, Globe, Copy, Check, ExternalLink, Cast, ShieldCheck } from 'lucide-react';
+import { Wifi, Globe, Copy, Check, ExternalLink, Cast, ShieldCheck, Loader2, Power } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useT } from '../LangContext';
+import type { TailscaleState } from '../lib/transport';
 import ServiceIcon, { type ServiceName } from '../components/ServiceIcon';
 import PageVpn from './PageVpn';
 
@@ -16,6 +18,94 @@ const SERVICES: { name: ServiceName; port: number }[] = [
 
 type Tab = 'local' | 'remote' | 'vpn';
 type Props = { config: Record<string, string>; onChanged: () => void; scrollToVpn?: boolean };
+
+// Remote access via Tailscale (private mesh; exposes only Jellyfin). Reuses the
+// same backend as the wizard's StepTailscale: status on mount, enable → QR login
+// → connected, plus a disable button (logout) the wizard doesn't need.
+function RemoteTab() {
+  const { t } = useT();
+  const [st, setSt] = useState<TailscaleState | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    window.electron.tailscaleStatus().then(setSt).catch(() => { /* ignore */ });
+    window.electron.onTailscaleProgress(setSt);
+  }, []);
+
+  // Poll while connecting in case an SSE event is dropped.
+  useEffect(() => {
+    if (!busy) return;
+    if (st && (st.stage === 'connected' || st.stage === 'failed')) return;
+    const id = setInterval(() => window.electron.tailscaleStatus().then(setSt).catch(() => { /* ignore */ }), 4000);
+    return () => clearInterval(id);
+  }, [busy, st]);
+
+  const enable = async () => {
+    setBusy(true);
+    const r = await window.electron.tailscaleUp();
+    if (r && 'stage' in r && r.stage) setSt(r as TailscaleState);
+  };
+  const disable = async () => {
+    await window.electron.tailscaleDown();
+    setSt({ running: false, stage: 'idle', loginUrl: '', accessUrl: '', error: '' });
+    setBusy(false);
+  };
+  const copy = (text: string) => { navigator.clipboard?.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500); };
+
+  return (
+    <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: 11, flexShrink: 0,
+          background: 'rgba(99,102,241,0.09)', border: '1.5px solid rgba(99,102,241,0.18)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1',
+        }}>
+          <Globe size={18} strokeWidth={1.75} />
+        </div>
+        <div>
+          <p style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text)' }}>{t.net_external_title}</p>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: 1 }}>Tailscale</p>
+        </div>
+      </div>
+
+      {st && st.stage === 'connected' ? (
+        st.accessUrl ? (
+          <>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-2)' }}>{t.tailscale_connected_desc}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', borderRadius: 10, background: 'rgba(13,148,136,0.06)', border: '1px solid rgba(13,148,136,0.2)' }}>
+              <span style={{ flex: 1, fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--accent)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{st.accessUrl}</span>
+              <button onClick={() => copy(st.accessUrl)} className="btn-secondary" style={{ padding: '5px 9px' }}>{copied ? <Check size={13} /> : <Copy size={13} />}</button>
+              <button onClick={() => window.electron.openExternal(st.accessUrl)} className="btn-secondary" style={{ padding: '5px 9px' }}><ExternalLink size={13} /></button>
+            </div>
+          </>
+        ) : (
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-2)' }}>{t.tailscale_certs_hint}</p>
+        )
+      ) : st && st.loginUrl ? (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+          <div style={{ background: '#fff', padding: 12, borderRadius: 14, border: '1px solid var(--border)' }}><QRCodeSVG value={st.loginUrl} size={160} /></div>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', textAlign: 'center' }}>{t.tailscale_scan_desc}</p>
+          <button onClick={() => window.electron.openExternal(st.loginUrl)} className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.82rem' }}><ExternalLink size={13} />{t.tailscale_open_link}</button>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}><Loader2 size={12} className="animate-spin" />{t.tailscale_waiting}</p>
+        </div>
+      ) : (
+        <>
+          <p style={{ fontSize: '0.82rem', lineHeight: 1.65, color: 'var(--text-2)' }}>{t.tailscale_sub}</p>
+          <button onClick={enable} disabled={busy} className="btn-primary" style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem' }}>
+            {busy ? <Loader2 size={14} className="animate-spin" /> : <Globe size={14} />}{t.tailscale_activate}
+          </button>
+        </>
+      )}
+
+      {st && st.stage === 'connected' && (
+        <button onClick={disable} className="btn-secondary" style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', color: '#ef4444' }}>
+          <Power size={13} />{t.tailscale_disable}
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function PageNetwork({ config, onChanged, scrollToVpn }: Props) {
   const { t } = useT();
@@ -141,32 +231,7 @@ export default function PageNetwork({ config, onChanged, scrollToVpn }: Props) {
         )}
 
         {/* Remote */}
-        {tab === 'remote' && (
-          <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: 11, flexShrink: 0,
-                background: 'rgba(99,102,241,0.09)', border: '1.5px solid rgba(99,102,241,0.18)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1',
-              }}>
-                <Globe size={18} strokeWidth={1.75} />
-              </div>
-              <div>
-                <p style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text)' }}>{t.net_external_title}</p>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: 1 }}>Tailscale</p>
-              </div>
-            </div>
-            <p style={{ fontSize: '0.82rem', lineHeight: 1.65, color: 'var(--text-2)' }}>{t.net_external_desc}</p>
-            <button
-              onClick={() => window.electron.openExternal('https://tailscale.com/download')}
-              className="btn-secondary"
-              style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.82rem' }}
-            >
-              <ExternalLink size={13} />{t.net_tailscale_btn}
-            </button>
-            <p style={{ fontSize: '0.75rem', lineHeight: 1.55, color: 'var(--text-3)' }}>{t.net_tailscale_desc}</p>
-          </div>
-        )}
+        {tab === 'remote' && <RemoteTab />}
 
         {/* VPN */}
         {tab === 'vpn' && (

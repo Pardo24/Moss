@@ -306,6 +306,102 @@ app.post('/api/install-to-disk', async (req, res) => {
 
 app.post('/api/install-to-disk-status', (_req, res) => res.json(installToDiskState));
 
+// ── Tailscale remote access (private mesh; exposes ONLY Jellyfin) ─────
+// Mirrors the install-to-disk async pattern: one job state, a start endpoint
+// that captures the interactive login URL, and a status poll. The tailscale
+// container ships with the stack but stays logged-out until the user enables
+// remote access here. Never `tailscale funnel` — private tailnet only.
+interface TailscaleState {
+  running: boolean;
+  stage: 'idle' | 'starting' | 'waiting-login' | 'serving' | 'connected' | 'failed';
+  loginUrl: string;    // https://login.tailscale.com/... shown as link + QR
+  accessUrl: string;   // https://gecko.<tailnet>.ts.net once serving Jellyfin
+  error: string;       // hint when logged in but serve failed (e.g. enable HTTPS certs)
+}
+const tailscaleState: TailscaleState = {
+  running: false, stage: 'idle', loginUrl: '', accessUrl: '', error: '',
+};
+
+const tsExec = (args: string) =>
+  execAsync(`docker exec media_tailscale tailscale ${args}`, { env: dockerEnv() });
+
+// Device's MagicDNS name from `tailscale status --json` → its https URL.
+async function tailscaleAccessUrl(): Promise<string> {
+  const { stdout } = await tsExec('status --json');
+  const dns = String(JSON.parse(stdout)?.Self?.DNSName ?? '').replace(/\.$/, '');
+  return dns ? `https://${dns}` : '';
+}
+
+app.post('/api/tailscale-up', async (_req, res) => {
+  if (tailscaleState.stage === 'connected') return res.json({ ok: true, ...tailscaleState });
+  if (tailscaleState.running)               return res.status(409).json({ error: 'already running' });
+
+  Object.assign(tailscaleState, {
+    running: true, stage: 'starting', loginUrl: '', accessUrl: '', error: '',
+  });
+  res.json({ ok: true, started: true });
+
+  // Container ships idle/logged-out with the stack; make sure it's up.
+  try { await execAsync('docker compose up -d tailscale', { cwd: COMPOSE_DIR, env: dockerEnv() }); }
+  catch { /* may already be running */ }
+
+  // `tailscale up` blocks until the user logs in, printing the auth URL first.
+  // Spawn (don't await), scrape the URL, treat exit 0 as authenticated.
+  // --accept-dns=false keeps Docker's DNS so media_jellyfin still resolves.
+  const proc = exec('docker exec media_tailscale tailscale up --hostname=gecko --accept-dns=false',
+                    { env: dockerEnv() });
+  const scan = (chunk: string) => {
+    const m = String(chunk).match(/https:\/\/login\.tailscale\.com\/\S+/);
+    if (m && !tailscaleState.loginUrl) {
+      tailscaleState.loginUrl = m[0];
+      tailscaleState.stage = 'waiting-login';
+      events.emit('tailscale-progress', { ...tailscaleState });
+    }
+  };
+  proc.stdout?.on('data', scan);
+  proc.stderr?.on('data', scan);   // tailscale prints the URL on stderr
+  proc.on('exit', async code => {
+    if (code === 0) {
+      tailscaleState.stage = 'connected';   // device is on the tailnet
+      try {
+        // Expose ONLY Jellyfin over the private tailnet (HTTPS, MagicDNS).
+        await tsExec('serve --bg --https=443 http://media_jellyfin:8096');
+        tailscaleState.accessUrl = await tailscaleAccessUrl();
+      } catch (err) {
+        // Logged in but couldn't publish — usually: enable HTTPS Certificates
+        // in the tailnet admin console. Surface the hint; device is still up.
+        tailscaleState.error = err instanceof Error ? err.message : String(err);
+      }
+    } else {
+      tailscaleState.stage = 'failed';
+      tailscaleState.error = tailscaleState.error || `tailscale up exited ${code}`;
+    }
+    tailscaleState.running = false;
+    events.emit('tailscale-progress', { ...tailscaleState });
+  });
+});
+
+app.post('/api/tailscale-status', async (_req, res) => {
+  // If idle, probe the container once — it may already be connected (e.g. after
+  // a reboot) so the dashboard can show the access URL without re-auth.
+  if (tailscaleState.stage === 'idle') {
+    try {
+      const { stdout } = await tsExec('status --json');
+      if (JSON.parse(stdout)?.BackendState === 'Running') {
+        tailscaleState.accessUrl = await tailscaleAccessUrl();
+        tailscaleState.stage = 'connected';
+      }
+    } catch { /* container down or logged out */ }
+  }
+  res.json(tailscaleState);
+});
+
+app.post('/api/tailscale-down', async (_req, res) => {
+  try { await tsExec('logout'); } catch { /* ignore */ }
+  Object.assign(tailscaleState, { running: false, stage: 'idle', loginUrl: '', accessUrl: '', error: '' });
+  res.status(204).end();
+});
+
 app.post('/api/wifi-status', async (_req, res) => {
   try {
     const { stdout } = await execAsync(
@@ -578,7 +674,7 @@ app.get('/api/events', (_req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
-  const NAMES = ['install-progress', 'install-to-disk-progress'] as const;
+  const NAMES = ['install-progress', 'install-to-disk-progress', 'tailscale-progress'] as const;
   const senders = NAMES.map(name => {
     const fn = (payload: unknown) => {
       res.write(`event: ${name}\n`);
